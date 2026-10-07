@@ -1,6 +1,7 @@
 from PyQt6 import uic
-from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow, QMessageBox
 import json
+from services.database_service import save_report
 
 
 class MainWindow(QMainWindow):
@@ -139,6 +140,15 @@ class MainWindow(QMainWindow):
         }
         rideDataDumped = json.dumps(rideData, indent=4)
         print(rideDataDumped)
+        ride_id = save_report(rideData)
+        print(ride_id)
+
+        QMessageBox.information(
+            self,
+            "Success",
+            f'Surf report rideID #{ride_id} saved successfully. \nCheck it out under the "Current Records" tab'
+        )
+
 
     def clear_validation(self, widgetList):
         for widget in widgetList:
