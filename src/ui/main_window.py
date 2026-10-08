@@ -1,8 +1,9 @@
 from PyQt6 import uic
-from PyQt6.QtWidgets import QMainWindow, QMessageBox
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem
 import json
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
+from services.database_service import get_surf_report
 
 
 class MainWindow(QMainWindow):
@@ -32,6 +33,9 @@ class MainWindow(QMainWindow):
         # Adding people
         self.rad2Friends.toggled.connect(self.friends_toggled)
         self.gboxAddPeople.setVisible(False)
+
+        # Load existing tables
+        self.load_surf_report()
 
     def send_surf_report(self):
         # Checking if all fields are valid to continue
@@ -85,14 +89,18 @@ class MainWindow(QMainWindow):
             interrupt = True
             self.dateSurfRide.setStyleSheet("border: 2px solid red;")
 
-
-
-
         if interrupt:
             print('Run popup window')
             return False
         else:
             return True
+
+    def clear_validation(self, widgetList):
+        for widget in widgetList:
+            widget.setStyleSheet("")
+
+    def friends_toggled(self, checked):
+        self.gboxAddPeople.setVisible(checked)
 
     def get_surf_form_data(self):
         date = self.dateSurfRide.date().toString("yyyy-MM-dd")
@@ -150,12 +158,14 @@ class MainWindow(QMainWindow):
         rideDataDumped = json.dumps(rideData, indent=4)
         print(rideDataDumped)
         ride_id = save_surf_report(rideData)
+        self.load_surf_report()
 
         QMessageBox.information(
             self,
             "Success",
             f'Surf report rideID #{ride_id} saved successfully. \nCheck it out under the "Current Records" tab'
         )
+
 
     def get_gas_form_data(self):
         date = self.dateGas.date().toString("yyyy-MM-dd")
@@ -167,7 +177,6 @@ class MainWindow(QMainWindow):
             'liter': liter,
             'cost': cost,
         }
-        print(gasData)
         gas_id = save_gas_report(gasData)
 
         QMessageBox.information(
@@ -176,11 +185,54 @@ class MainWindow(QMainWindow):
             f'Gas report gasID #{gas_id} saved successfully'
         )
 
+    def load_surf_report(self):
 
-    def clear_validation(self, widgetList):
-        for widget in widgetList:
-            widget.setStyleSheet("")
+        reports = get_surf_report()
+        self.tabletRides.setRowCount(len(reports))
+        self.tabletRides.setColumnCount(14)
 
-    def friends_toggled(self, checked):
-        self.gboxAddPeople.setVisible(checked)
-        print(checked)
+        for row_index, row_data in enumerate(reports):
+            for column_index, value in enumerate(row_data):
+                print(value)
+                self.tabletRides.setItem(row_index, column_index, QTableWidgetItem(str(value)))
+
+        self.tabletRides.setHorizontalHeaderLabels([
+            "ID",
+            "Date",
+            "Weather",
+            "Friends",
+            "Injuries",
+            "Temperature",
+            "Time",
+            "Comments",
+            "Distance",
+            "Instagram",
+            "CTX",
+            "Surf Type",
+            "LED",
+            "Start Point"
+        ])
+
+        self.tabletRides.resizeColumnsToContents()
+        self.tabletRides.verticalHeader().setVisible(False)
+
+        self.tabletRides.cellDoubleClicked.connect(
+            self.load_report
+        )
+
+    def load_report(self, row, column):
+
+        ride_id = self.tabletRides.item(row, 0).text()
+        print(ride_id)
+
+        #self.load_ride(ride_id)
+
+        """
+        SELECT *
+        FROM surfReport
+        WHERE rideId = ?
+        
+        self.txtTemperature.setText(...)
+        self.cmbWeather.setCurrentText(...)
+        self.chkLedLights.setChecked(...)
+        """

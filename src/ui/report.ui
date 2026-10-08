@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>941</width>
-    <height>582</height>
+    <width>768</width>
+    <height>606</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -56,7 +56,7 @@
       <item>
        <widget class="QTabWidget" name="tabMain">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tabSurfReport">
          <property name="sizePolicy">
@@ -1074,67 +1074,58 @@
           <item>
            <widget class="QTabWidget" name="tabTables">
             <property name="currentIndex">
-             <number>3</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="tabRide">
              <attribute name="title">
               <string>Rides</string>
              </attribute>
-             <widget class="QTableWidget" name="tableWidget">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>10</y>
-                <width>731</width>
-                <height>451</height>
-               </rect>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_14">
+              <item>
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Double-click to edit</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTableWidget" name="tabletRides">
+                <property name="editTriggers">
+                 <set>QAbstractItemView::NoEditTriggers</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tabGas">
              <attribute name="title">
               <string>Gas</string>
              </attribute>
-             <widget class="QTableWidget" name="tableWidget_2">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>10</y>
-                <width>711</width>
-                <height>431</height>
-               </rect>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_15">
+              <item>
+               <widget class="QTableWidget" name="tabletGas"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tabFriends">
              <attribute name="title">
               <string>Frieds</string>
              </attribute>
-             <widget class="QTableWidget" name="tableWidget_3">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>10</y>
-                <width>711</width>
-                <height>431</height>
-               </rect>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_16">
+              <item>
+               <widget class="QTableWidget" name="tabletFriends"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tabLocations">
              <attribute name="title">
               <string>Locations</string>
              </attribute>
-             <widget class="QTableWidget" name="tableWidget_4">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>10</y>
-                <width>711</width>
-                <height>431</height>
-               </rect>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_17">
+              <item>
+               <widget class="QTableWidget" name="tabletLocations"/>
+              </item>
+             </layout>
             </widget>
            </widget>
           </item>

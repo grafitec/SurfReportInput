@@ -136,3 +136,16 @@ def save_gas_report(report):
     gas_id = cursor.lastrowid
     connection.close()
     return gas_id
+
+def get_surf_report():
+    connection = sqlite3.connect(databasePath)
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT *
+        FROM surfReport
+        ORDER BY rideId DESC
+    """)
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
+
