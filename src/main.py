@@ -5,6 +5,17 @@ from ui.main_window import MainWindow
 from services.database_service import initiate_database
 import traceback
 
+# To do
+# Make StartPoint working
+# Show data in the tabel
+# Check if rows can be selected
+# Load rows into the formular
+# Rename buttons
+
+# Add support for mail submission
+# Add support for CTX files
+
+
 def buildUI():
     # Build database
     initiate_database()

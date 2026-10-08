@@ -1,7 +1,8 @@
 from PyQt6 import uic
 from PyQt6.QtWidgets import QMainWindow, QMessageBox
 import json
-from services.database_service import save_report
+from services.database_service import save_surf_report
+from services.database_service import save_gas_report
 
 
 class MainWindow(QMainWindow):
@@ -11,6 +12,7 @@ class MainWindow(QMainWindow):
 
         # main button
         self.btnSendSurfReport.clicked.connect(self.send_surf_report)
+        self.btnSendGasReport.clicked.connect(self.send_gas_report)
 
         # clear validation
         self.txtComment.textChanged.connect(lambda: self.clear_validation([self.txtComment]))
@@ -33,15 +35,19 @@ class MainWindow(QMainWindow):
 
     def send_surf_report(self):
         # Checking if all fields are valid to continue
-        if not self.chkSkip.isChecked():
-            valid = self.validate_form()
-        else:
+        if self.chkSkip.isChecked():
             valid = True
+        else:
+            valid = self.validate_surf_form()
+
         if valid:
             # Query all the data from the form
-            self.get_form_data()
+            self.get_surf_form_data()
 
-    def validate_form(self):
+    def send_gas_report(self):
+        self.get_gas_form_data()
+
+    def validate_surf_form(self):
         interrupt = False
         if self.txtComment.text() == '':
             interrupt = True
@@ -58,11 +64,11 @@ class MainWindow(QMainWindow):
         if self.cmbSurfType.currentText() == '':
             interrupt = True
             self.cmbSurfType.setStyleSheet("border: 2px solid red;")
-        if self.rad1LedLight.isChecked() == False or self.rad2LedLight.isChecked() == False:
+        if self.rad1LedLight.isChecked() == False and self.rad2LedLight.isChecked() == False:
             interrupt = True
             self.rad1LedLight.setStyleSheet("border: 2px solid red;")
             self.rad2LedLight.setStyleSheet("border: 2px solid red;")
-        if self.rad1Friends.isChecked() == False or self.rad2Friends.isChecked() == False:
+        if self.rad1Friends.isChecked() == False and self.rad2Friends.isChecked() == False:
             interrupt = True
             self.rad1Friends.setStyleSheet("border: 2px solid red;")
             self.rad2Friends.setStyleSheet("border: 2px solid red;")
@@ -88,7 +94,7 @@ class MainWindow(QMainWindow):
         else:
             return True
 
-    def get_form_data(self):
+    def get_surf_form_data(self):
         date = self.dateSurfRide.date().toString("yyyy-MM-dd")
         comments = self.txtComment.text()
         timeOnWater = self.spnTimeOnWater.value()
@@ -103,23 +109,26 @@ class MainWindow(QMainWindow):
         ledLights = self.rad2LedLight.isChecked()
         friends = self.rad2Friends.isChecked()
 
-        friendsName = []
-        if not self.txtFriend1.text() == '':
-            friendsName.append(self.txtFriend1.text())
-        if not self.txtFriend2.text() == '':
-            friendsName.append(self.txtFriend2.text())
-        if not self.txtFriend3.text() == '':
-            friendsName.append(self.txtFriend3.text())
-        if not self.txtFriend4.text() == '':
-            friendsName.append(self.txtFriend4.text())
-        if not self.txtFriend5.text() == '':
-            friendsName.append(self.txtFriend5.text())
-        if not self.txtFriend6.text() == '':
-            friendsName.append(self.txtFriend6.text())
-        if not self.txtFriend7.text() == '':
-            friendsName.append(self.txtFriend7.text())
-        if not self.txtFriend8.text() == '':
-            friendsName.append(self.txtFriend8.text())
+        if friends:
+            friendsName = []
+            if not self.txtFriend1.text() == '':
+                friendsName.append(self.txtFriend1.text())
+            if not self.txtFriend2.text() == '':
+                friendsName.append(self.txtFriend2.text())
+            if not self.txtFriend3.text() == '':
+                friendsName.append(self.txtFriend3.text())
+            if not self.txtFriend4.text() == '':
+                friendsName.append(self.txtFriend4.text())
+            if not self.txtFriend5.text() == '':
+                friendsName.append(self.txtFriend5.text())
+            if not self.txtFriend6.text() == '':
+                friendsName.append(self.txtFriend6.text())
+            if not self.txtFriend7.text() == '':
+                friendsName.append(self.txtFriend7.text())
+            if not self.txtFriend8.text() == '':
+                friendsName.append(self.txtFriend8.text())
+        else:
+            friendsName = []
 
 
         rideData = {
@@ -140,13 +149,31 @@ class MainWindow(QMainWindow):
         }
         rideDataDumped = json.dumps(rideData, indent=4)
         print(rideDataDumped)
-        ride_id = save_report(rideData)
-        print(ride_id)
+        ride_id = save_surf_report(rideData)
 
         QMessageBox.information(
             self,
             "Success",
             f'Surf report rideID #{ride_id} saved successfully. \nCheck it out under the "Current Records" tab'
+        )
+
+    def get_gas_form_data(self):
+        date = self.dateGas.date().toString("yyyy-MM-dd")
+        liter = self.spnLiter.value()
+        cost = self.spnCost.value()
+
+        gasData = {
+            'date': date,
+            'liter': liter,
+            'cost': cost,
+        }
+        print(gasData)
+        gas_id = save_gas_report(gasData)
+
+        QMessageBox.information(
+            self,
+            "Success",
+            f'Gas report gasID #{gas_id} saved successfully'
         )
 
 

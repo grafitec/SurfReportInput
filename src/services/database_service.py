@@ -25,10 +25,34 @@ def initiate_database():
         startPoint TEXT
         )
     """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS surfFriends (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        rideId INTEGER,
+        person TEXT
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS gasReport (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT,
+        liters INTEGER,
+        cost INTEGER
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS locations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        startPoint TEXT,
+        longitud DECIMAL,
+        latitud DECIMAL
+        )
+    """)
     connection.commit()
     connection.close()
 
-def save_report(report):
+def save_surf_report(report):
     connection = sqlite3.connect(databasePath)
     cursor = connection.cursor()
 
@@ -68,7 +92,47 @@ def save_report(report):
     ))
     connection.commit()
     ride_id = cursor.lastrowid
+
+    for person in report["friendsName"]:
+        cursor.execute("""
+            INSERT INTO surfFriends
+            (
+                rideId,
+                person
+            )
+            VALUES (?, ?)
+        """,
+        (
+            ride_id,
+            person
+        ))
+        connection.commit()
+
+
+
     connection.close()
 
     return ride_id
 
+def save_gas_report(report):
+    connection = sqlite3.connect(databasePath)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT INTO gasReport
+        (
+            date,
+            liters,
+            cost
+        )
+        VALUES (?, ?, ?)
+    """,
+    (
+        report['date'],
+        report['liter'],
+        report['cost']
+    ))
+    connection.commit()
+    gas_id = cursor.lastrowid
+    connection.close()
+    return gas_id
