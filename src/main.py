@@ -11,8 +11,6 @@ import traceback
 
 # Populate friends table
 # fixa browse knappen
-# Put the gas table into the tab
-# Make a total price of the gas and total times i bought
 # Add support for mail submission
 # Add support for CTX files
 # Test out panda and some graphic element

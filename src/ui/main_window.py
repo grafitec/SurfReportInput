@@ -4,6 +4,7 @@ from PyQt6.QtCore import QDate
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
 from services.database_service import get_surf_report
+from services.database_service import get_gas_report
 from services.database_service import get_next_id
 from services.database_service import load_ride_from_id
 
@@ -47,7 +48,7 @@ class MainWindow(QMainWindow):
             self.process_surf_data()
 
     def send_gas_report(self):
-        self.get_gas_form_data()
+        self.process_gas_data()
 
     def validate_surf_form(self):
         interrupt = False
@@ -88,7 +89,6 @@ class MainWindow(QMainWindow):
             self.dateSurfRide.setStyleSheet("border: 2px solid red;")
 
         if interrupt:
-            print('Run popup window')
             return False
         else:
             return True
@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
         self.resetUI()
 
 
-    def get_gas_form_data(self):
+    def process_gas_data(self):
         date = self.dateGas.date().toString("yyyy-MM-dd")
         liter = self.spnLiter.value()
         cost = self.spnCost.value()
@@ -190,6 +190,8 @@ class MainWindow(QMainWindow):
         }
         gas_id = save_gas_report(gasData)
 
+        self.load_surf_report_into_tables()
+
         QMessageBox.information(
             self,
             "Success",
@@ -197,15 +199,13 @@ class MainWindow(QMainWindow):
         )
 
     def load_surf_report_into_tables(self):
-
+        # surf report
         reports = get_surf_report()
         self.tabletRides.setRowCount(len(reports))
         self.tabletRides.setColumnCount(14)
-
         for row_index, row_data in enumerate(reports):
             for column_index, value in enumerate(row_data):
                 self.tabletRides.setItem(row_index, column_index, QTableWidgetItem(str(value)))
-
         self.tabletRides.setHorizontalHeaderLabels([
             "ID",
             "Date",
@@ -222,13 +222,35 @@ class MainWindow(QMainWindow):
             "LED",
             "Start Point"
         ])
-
         self.tabletRides.resizeColumnsToContents()
         self.tabletRides.verticalHeader().setVisible(False)
+        self.tabletRides.cellDoubleClicked.connect(self.load_report)
 
-        self.tabletRides.cellDoubleClicked.connect(
-            self.load_report
-        )
+        # Gas report
+        reports = get_gas_report()
+        self.tabletGas_2.setRowCount(len(reports))
+        self.tabletGas_2.setColumnCount(4)
+        for row_index, row_data in enumerate(reports):
+            for column_index, value in enumerate(row_data):
+                self.tabletGas_2.setItem(row_index, column_index, QTableWidgetItem(str(value)))
+        self.tabletGas_2.setHorizontalHeaderLabels([
+            "ID",
+            "Date",
+            "liters",
+            "cost",
+        ])
+        self.tabletGas_2.resizeColumnsToContents()
+        self.tabletGas_2.verticalHeader().setVisible(False)
+
+        # Count cost and liters
+        total_liters = 0
+        total_cost = 0
+        for row in reports:
+            total_liters += row[2]
+            total_cost += row[3]
+        self.labLiters.setText(str(total_liters) + ' liters')
+        self.labCost.setText(str(total_cost) + ' kr')
+
 
     def load_report(self, row, column):
 

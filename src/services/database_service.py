@@ -108,7 +108,6 @@ def save_surf_report(report, surfID):
             ))
             connection.commit()
     else:
-        print('Update')
         cursor.execute("""
             UPDATE surfReport
             SET
@@ -201,6 +200,18 @@ def get_surf_report():
         SELECT *
         FROM surfReport
         ORDER BY rideId DESC
+    """)
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
+
+def get_gas_report():
+    connection = sqlite3.connect(databasePath)
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT *
+        FROM gasReport
+        ORDER BY id DESC
     """)
     rows = cursor.fetchall()
     connection.close()
