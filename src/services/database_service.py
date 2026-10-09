@@ -52,63 +52,120 @@ def initiate_database():
     connection.commit()
     connection.close()
 
-def save_surf_report(report):
+def save_surf_report(report, surfID):
     connection = sqlite3.connect(databasePath)
     cursor = connection.cursor()
-
-    cursor.execute("""
-        INSERT INTO surfReport
-        (
-            rideDate,
-            weather,
-            friends,
-            injuries,
-            temperature,
-            timeOnWater,
-            comments, 
-            distance,
-            instaLink,
-            ctxPath,
-            surfType,
-            ledLights,
-            startPoint
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """,
-    (
-        report["date"],
-        report["weather"],
-        report["friends"],
-        report["injuries"],
-        report["temperature"],
-        report["timeOnWater"],
-        report["comments"],
-        report["distance"],
-        report["instaLink"],
-        report["ctxPath"],
-        report["surfType"],
-        report["ledLights"],
-        report["startPoint"]
-    ))
-    connection.commit()
-    ride_id = cursor.lastrowid
-
-    for person in report["friendsName"]:
+    if surfID == 0:
         cursor.execute("""
-            INSERT INTO surfFriends
+            INSERT INTO surfReport
             (
-                rideId,
-                person
+                rideDate,
+                weather,
+                friends,
+                injuries,
+                temperature,
+                timeOnWater,
+                comments, 
+                distance,
+                instaLink,
+                ctxPath,
+                surfType,
+                ledLights,
+                startPoint
             )
-            VALUES (?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
-            ride_id,
-            person
+            report["date"],
+            report["weather"],
+            report["friends"],
+            report["injuries"],
+            report["temperature"],
+            report["timeOnWater"],
+            report["comments"],
+            report["distance"],
+            report["instaLink"],
+            report["ctxPath"],
+            report["surfType"],
+            report["ledLights"],
+            report["startPoint"]
+        ))
+        connection.commit()
+        ride_id = cursor.lastrowid
+
+        for person in report["friendsName"]:
+            cursor.execute("""
+                INSERT INTO surfFriends
+                (
+                    rideId,
+                    person
+                )
+                VALUES (?, ?)
+            """,
+            (
+                ride_id,
+                person
+            ))
+            connection.commit()
+    else:
+        print('Update')
+        cursor.execute("""
+            UPDATE surfReport
+            SET
+                rideDate = ?,
+                weather = ?,
+                friends = ?,
+                injuries = ?,
+                temperature = ?,
+                timeOnWater = ?,
+                comments = ?,
+                distance = ?,
+                instaLink = ?,
+                ctxPath = ?,
+                surfType = ?,
+                ledLights = ?,
+                startPoint = ?
+            WHERE rideId = ?
+        """,
+        (
+            report["date"],
+            report["weather"],
+            report["friends"],
+            report["injuries"],
+            report["temperature"],
+            report["timeOnWater"],
+            report["comments"],
+            report["distance"],
+            report["instaLink"],
+            report["ctxPath"],
+            report["surfType"],
+            report["ledLights"],
+            report["startPoint"],
+            surfID
         ))
         connection.commit()
 
+        cursor.execute("""
+            DELETE FROM surfFriends
+            WHERE rideId = ?
+        """, (surfID,))
 
+        for person in report["friendsName"]:
+            cursor.execute("""
+                INSERT INTO surfFriends
+                (
+                    rideId,
+                    person
+                )
+                VALUES (?, ?)
+            """,
+           (
+               surfID,
+               person
+           ))
+            connection.commit()
+
+        ride_id = surfID
 
     connection.close()
 
@@ -149,3 +206,39 @@ def get_surf_report():
     connection.close()
     return rows
 
+def get_next_id():
+    connection = sqlite3.connect(databasePath)
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT *
+        FROM surfReport
+        ORDER BY rideId DESC
+    """)
+    rows = cursor.fetchall()
+    connection.close()
+    nextNumber = len(rows)+1
+    return nextNumber
+
+def load_ride_from_id(id):
+    connection = sqlite3.connect(databasePath)
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT *
+        FROM surfReport
+        WHERE rideId == %s
+    """ %(str(id)))
+    currentRow = cursor.fetchone()
+    currentRowList = list(currentRow)
+    if currentRow[3] == 1:
+        cursor.execute("""
+            SELECT *
+            FROM surfFriends
+            WHERE rideId == %s
+        """ % (str(id)))
+        friendsRow = cursor.fetchall()
+        friendsList = []
+        for row in friendsRow:
+           friendsList.append(row[2])
+        currentRowList.append(friendsList)
+    connection.close()
+    return currentRowList

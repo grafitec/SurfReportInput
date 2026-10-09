@@ -1,9 +1,11 @@
 from PyQt6 import uic
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem
-import json
+from PyQt6.QtCore import QDate
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
 from services.database_service import get_surf_report
+from services.database_service import get_next_id
+from services.database_service import load_ride_from_id
 
 
 class MainWindow(QMainWindow):
@@ -14,28 +16,24 @@ class MainWindow(QMainWindow):
         # main button
         self.btnSendSurfReport.clicked.connect(self.send_surf_report)
         self.btnSendGasReport.clicked.connect(self.send_gas_report)
+        self.btnReset.clicked.connect(self.resetUI)
+
+        # variables
+        self.currentID = 0
+        self.friendsFields = [self.txtFriend1, self.txtFriend2, self.txtFriend3, self.txtFriend4, self.txtFriend5, self.txtFriend6, self.txtFriend7, self.txtFriend8]
 
         # clear validation
-        self.txtComment.textChanged.connect(lambda: self.clear_validation([self.txtComment]))
-        self.spnTimeOnWater.textChanged.connect(lambda: self.clear_validation([self.spnTimeOnWater]))
-        self.spnDistance.textChanged.connect(lambda: self.clear_validation([self.spnDistance]))
-        self.cmbWeather.currentTextChanged.connect(lambda: self.clear_validation([self.cmbWeather]))
-        self.cmbSurfType.currentTextChanged.connect(lambda: self.clear_validation([self.cmbSurfType]))
-        self.cmbAnyInjuries.currentTextChanged.connect(lambda: self.clear_validation([self.cmbAnyInjuries]))
-        self.cmbTemperature.currentTextChanged.connect(lambda: self.clear_validation([self.cmbTemperature]))
-        self.cmbStartPoint.currentTextChanged.connect(lambda: self.clear_validation([self.cmbStartPoint]))
-        self.dateSurfRide.dateChanged.connect(lambda: self.clear_validation([self.dateSurfRide]))
-        self.rad2LedLight.toggled.connect(lambda: self.clear_validation([self.rad2LedLight, self.rad1LedLight]))
-        self.rad1LedLight.toggled.connect(lambda: self.clear_validation([self.rad1LedLight, self.rad2LedLight]))
-        self.rad1Friends.toggled.connect(lambda: self.clear_validation([self.rad1Friends, self.rad2Friends]))
-        self.rad2Friends.toggled.connect(lambda: self.clear_validation([self.rad2Friends, self.rad1Friends]))
+        self.clearVal()
+
 
         # Adding people
         self.rad2Friends.toggled.connect(self.friends_toggled)
         self.gboxAddPeople.setVisible(False)
 
         # Load existing tables
-        self.load_surf_report()
+        self.load_surf_report_into_tables()
+        nextId = get_next_id()
+        self.labHeader.setText('Will add new row into database, rideID #'+str(nextId))
 
     def send_surf_report(self):
         # Checking if all fields are valid to continue
@@ -46,7 +44,7 @@ class MainWindow(QMainWindow):
 
         if valid:
             # Query all the data from the form
-            self.get_surf_form_data()
+            self.process_surf_data()
 
     def send_gas_report(self):
         self.get_gas_form_data()
@@ -102,7 +100,23 @@ class MainWindow(QMainWindow):
     def friends_toggled(self, checked):
         self.gboxAddPeople.setVisible(checked)
 
-    def get_surf_form_data(self):
+    def clearVal(self):
+        self.txtComment.textChanged.connect(lambda: self.clear_validation([self.txtComment]))
+        self.spnTimeOnWater.textChanged.connect(lambda: self.clear_validation([self.spnTimeOnWater]))
+        self.spnDistance.textChanged.connect(lambda: self.clear_validation([self.spnDistance]))
+        self.cmbWeather.currentTextChanged.connect(lambda: self.clear_validation([self.cmbWeather]))
+        self.cmbSurfType.currentTextChanged.connect(lambda: self.clear_validation([self.cmbSurfType]))
+        self.cmbAnyInjuries.currentTextChanged.connect(lambda: self.clear_validation([self.cmbAnyInjuries]))
+        self.cmbTemperature.currentTextChanged.connect(lambda: self.clear_validation([self.cmbTemperature]))
+        self.cmbStartPoint.currentTextChanged.connect(lambda: self.clear_validation([self.cmbStartPoint]))
+        self.dateSurfRide.dateChanged.connect(lambda: self.clear_validation([self.dateSurfRide]))
+        self.rad2LedLight.toggled.connect(lambda: self.clear_validation([self.rad2LedLight, self.rad1LedLight]))
+        self.rad1LedLight.toggled.connect(lambda: self.clear_validation([self.rad1LedLight, self.rad2LedLight]))
+        self.rad1Friends.toggled.connect(lambda: self.clear_validation([self.rad1Friends, self.rad2Friends]))
+        self.rad2Friends.toggled.connect(lambda: self.clear_validation([self.rad2Friends, self.rad1Friends]))
+
+
+    def process_surf_data(self):
         date = self.dateSurfRide.date().toString("yyyy-MM-dd")
         comments = self.txtComment.text()
         timeOnWater = self.spnTimeOnWater.value()
@@ -119,22 +133,9 @@ class MainWindow(QMainWindow):
 
         if friends:
             friendsName = []
-            if not self.txtFriend1.text() == '':
-                friendsName.append(self.txtFriend1.text())
-            if not self.txtFriend2.text() == '':
-                friendsName.append(self.txtFriend2.text())
-            if not self.txtFriend3.text() == '':
-                friendsName.append(self.txtFriend3.text())
-            if not self.txtFriend4.text() == '':
-                friendsName.append(self.txtFriend4.text())
-            if not self.txtFriend5.text() == '':
-                friendsName.append(self.txtFriend5.text())
-            if not self.txtFriend6.text() == '':
-                friendsName.append(self.txtFriend6.text())
-            if not self.txtFriend7.text() == '':
-                friendsName.append(self.txtFriend7.text())
-            if not self.txtFriend8.text() == '':
-                friendsName.append(self.txtFriend8.text())
+            for field in self.friendsFields:
+                if not field.text() == '':
+                    friendsName.append(field.text())
         else:
             friendsName = []
 
@@ -155,16 +156,26 @@ class MainWindow(QMainWindow):
             'startPoint': startPoint,
             'friendsName': friendsName,
         }
-        rideDataDumped = json.dumps(rideData, indent=4)
-        print(rideDataDumped)
-        ride_id = save_surf_report(rideData)
-        self.load_surf_report()
+        # Send to database
+        ride_id = save_surf_report(rideData, self.currentID)
+
+        # Update database UI
+        self.load_surf_report_into_tables()
+
+
+        if self.currentID == 0:
+            msg = f'Surf report rideID #{ride_id} saved successfully. \nCheck it out under the "Current records" tab'
+        else:
+            msg = f'Surf report rideID #{ride_id} updated successfully. \nCheck it out under the "Current records" tab'
 
         QMessageBox.information(
             self,
             "Success",
-            f'Surf report rideID #{ride_id} saved successfully. \nCheck it out under the "Current Records" tab'
+            msg
         )
+
+        # Reset the form
+        self.resetUI()
 
 
     def get_gas_form_data(self):
@@ -185,7 +196,7 @@ class MainWindow(QMainWindow):
             f'Gas report gasID #{gas_id} saved successfully'
         )
 
-    def load_surf_report(self):
+    def load_surf_report_into_tables(self):
 
         reports = get_surf_report()
         self.tabletRides.setRowCount(len(reports))
@@ -193,7 +204,6 @@ class MainWindow(QMainWindow):
 
         for row_index, row_data in enumerate(reports):
             for column_index, value in enumerate(row_data):
-                print(value)
                 self.tabletRides.setItem(row_index, column_index, QTableWidgetItem(str(value)))
 
         self.tabletRides.setHorizontalHeaderLabels([
@@ -222,17 +232,69 @@ class MainWindow(QMainWindow):
 
     def load_report(self, row, column):
 
-        ride_id = self.tabletRides.item(row, 0).text()
-        print(ride_id)
+        self.currentID = self.tabletRides.item(row, 0).text()
+        self.tabMain.setCurrentIndex(0)
+        self.labHeader.setText('Will update row in database, rideID #' + str(self.currentID))
+        self.btnSendSurfReport.setText('Update row #' + str(self.currentID))
+        rideData = load_ride_from_id(self.currentID)
+        print(rideData)
+        date = QDate.fromString(rideData[1], "yyyy-MM-dd")
+        self.dateSurfRide.setDate(date)
+        self.cmbWeather.setCurrentText(rideData[2])
+        self.cmbAnyInjuries.setCurrentText(rideData[4])
+        self.cmbTemperature.setCurrentText(rideData[5])
+        self.spnTimeOnWater.setValue(rideData[6])
+        self.txtComment.setText(rideData[7])
+        self.spnDistance.setValue(rideData[8])
+        self.txtInstaLink.setText(rideData[9])
+        self.txtCtxPath.setText(rideData[10])
+        self.cmbSurfType.setCurrentText(rideData[11])
+        self.cmbStartPoint.setCurrentText(rideData[13])
+        if rideData[3] == 1:
+            self.rad2Friends.setChecked(True)
 
-        #self.load_ride(ride_id)
+            for field in self.friendsFields:
+                field.setText('')
 
-        """
-        SELECT *
-        FROM surfReport
-        WHERE rideId = ?
-        
-        self.txtTemperature.setText(...)
-        self.cmbWeather.setCurrentText(...)
-        self.chkLedLights.setChecked(...)
-        """
+            for name in rideData[14]:
+                for field in self.friendsFields:
+                    if field.text() == '':
+                        field.setText(name)
+                        break
+                continue
+            self.friends_toggled(True)
+
+        else:
+            self.rad1Friends.setChecked(True)
+        if rideData[12] == 1:
+            self.rad2LedLight.setChecked(True)
+        else:
+            self.rad1LedLight.setChecked(True)
+
+
+
+
+    def resetUI(self):
+        nextId = get_next_id()
+        self.currentID = 0
+
+        self.labHeader.setText('Will add new row into database, rideID #'+str(nextId))
+        self.btnSendSurfReport.setText('Add surf report')
+        date = QDate.fromString('2027-01-01', "yyyy-MM-dd")
+        self.dateSurfRide.setDate(date)
+        self.txtComment.setText('')
+        self.spnTimeOnWater.setValue(0)
+        self.spnDistance.setValue(0)
+        self.txtInstaLink.setText('')
+        self.txtCtxPath.setText('')
+        self.cmbWeather.setCurrentText('')
+        self.cmbSurfType.setCurrentText('')
+        self.cmbTemperature.setCurrentText('')
+        self.cmbStartPoint.setCurrentText('')
+        self.cmbAnyInjuries.setCurrentText('')
+        self.rad2LedLight.setChecked(False)
+        self.rad2Friends.setChecked(False)
+        self.rad1Friends.setChecked(False)
+        self.rad1LedLight.setChecked(False)
+        for field in self.friendsFields:
+            field.setText('')

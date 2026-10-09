@@ -56,7 +56,7 @@
       <item>
        <widget class="QTabWidget" name="tabMain">
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tabSurfReport">
          <property name="sizePolicy">
@@ -87,37 +87,12 @@
                </spacer>
               </item>
               <item>
-               <widget class="QLabel" name="label_17">
+               <widget class="QLabel" name="labHeader">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>RideID: 1</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnLoadRide">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="baseSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Load RideID</string>
+                 <string>Will add new row into database, rideId #10</string>
                 </property>
                </widget>
               </item>
@@ -903,6 +878,13 @@
                </widget>
               </item>
               <item>
+               <widget class="QPushButton" name="btnReset">
+                <property name="text">
+                 <string>Reset form</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="btnSendSurfReport">
                 <property name="minimumSize">
                  <size>
@@ -911,7 +893,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>Send surf report</string>
+                 <string>Add surf report</string>
                 </property>
                </widget>
               </item>
@@ -1022,6 +1004,25 @@
                  </spacer>
                 </item>
                </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_13">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QTableWidget" name="tabletGas_2"/>
               </item>
               <item>
                <spacer name="horizontalSpacer_3">

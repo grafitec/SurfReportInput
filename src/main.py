@@ -7,13 +7,18 @@ import traceback
 
 # To do
 # Make StartPoint working
-# Show data in the tabel
-# Check if rows can be selected
-# Load rows into the formular
-# Rename buttons
 
+
+# Populate friends table
+# fixa browse knappen
+# Put the gas table into the tab
+# Make a total price of the gas and total times i bought
 # Add support for mail submission
 # Add support for CTX files
+# Test out panda and some graphic element
+# Make an Anayze button or Analyze tab
+# Make pages
+# Test maps, folium or plotly maps
 
 
 def buildUI():
