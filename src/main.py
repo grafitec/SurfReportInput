@@ -9,7 +9,6 @@ import traceback
 # Make StartPoint working
 
 
-# Populate friends table
 # fixa browse knappen
 # Add support for mail submission
 # Add support for CTX files

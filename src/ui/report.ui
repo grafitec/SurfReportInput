@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>698</width>
+    <width>730</width>
     <height>606</height>
    </rect>
   </property>
@@ -56,7 +56,7 @@
       <item>
        <widget class="QTabWidget" name="tabMain">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tabSurfReport">
          <property name="sizePolicy">
@@ -750,7 +750,7 @@
                   <item>
                    <widget class="QLabel" name="label_13">
                     <property name="text">
-                     <string>Start point: </string>
+                     <string>Surf launch: </string>
                     </property>
                    </widget>
                   </item>
@@ -1096,7 +1096,11 @@
                </spacer>
               </item>
               <item>
-               <widget class="QTableWidget" name="tabletGas_2"/>
+               <widget class="QTableWidget" name="tabletGas_2">
+                <property name="editTriggers">
+                 <set>QAbstractItemView::NoEditTriggers</set>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="horizontalSpacer_3">
@@ -1153,7 +1157,7 @@
             </property>
             <widget class="QWidget" name="tabRide">
              <attribute name="title">
-              <string>Rides</string>
+              <string>Rides table</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_14">
               <item>
@@ -1169,36 +1173,6 @@
                  <set>QAbstractItemView::NoEditTriggers</set>
                 </property>
                </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="tabGas">
-             <attribute name="title">
-              <string>Gas</string>
-             </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_15">
-              <item>
-               <widget class="QTableWidget" name="tabletGas"/>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="tabFriends">
-             <attribute name="title">
-              <string>Frieds</string>
-             </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_16">
-              <item>
-               <widget class="QTableWidget" name="tabletFriends"/>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="tabLocations">
-             <attribute name="title">
-              <string>Locations</string>
-             </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_17">
-              <item>
-               <widget class="QTableWidget" name="tabletLocations"/>
               </item>
              </layout>
             </widget>

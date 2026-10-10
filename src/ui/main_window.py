@@ -1,5 +1,5 @@
 from PyQt6 import uic
-from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog
 from PyQt6.QtCore import QDate
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
@@ -8,16 +8,24 @@ from services.database_service import get_gas_report
 from services.database_service import get_next_id
 from services.database_service import load_ride_from_id
 
+class LocationDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi("ui/dialog_surf_launch.ui", self)
+        self.btnOkay.clicked.connect(self.accept)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi("ui/report.ui", self)
 
-        # main button
+        # main buttons
         self.btnSendSurfReport.clicked.connect(self.send_surf_report)
         self.btnSendGasReport.clicked.connect(self.send_gas_report)
         self.btnReset.clicked.connect(self.resetUI)
+
+        self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocation([self.cmbStartPoint]))
+
 
         # variables
         self.currentID = 0
@@ -25,7 +33,6 @@ class MainWindow(QMainWindow):
 
         # clear validation
         self.clearVal()
-
 
         # Adding people
         self.rad2Friends.toggled.connect(self.friends_toggled)
@@ -49,6 +56,21 @@ class MainWindow(QMainWindow):
 
     def send_gas_report(self):
         self.process_gas_data()
+
+    def clear_validation(self, widgetList):
+        for widget in widgetList:
+            widget.setStyleSheet("")
+
+    def addStartLocation(self, widget):
+        if self.cmbStartPoint.currentText() == 'Add location':
+            print('Add location')
+            dialog = LocationDialog()
+            if dialog.exec():
+                location = dialog.txtLocation.text()
+                gpsCor = dialog.txtGpsCor.text()
+
+                print(location)
+                print(gpsCor)
 
     def validate_surf_form(self):
         interrupt = False
@@ -92,10 +114,6 @@ class MainWindow(QMainWindow):
             return False
         else:
             return True
-
-    def clear_validation(self, widgetList):
-        for widget in widgetList:
-            widget.setStyleSheet("")
 
     def friends_toggled(self, checked):
         self.gboxAddPeople.setVisible(checked)
@@ -199,7 +217,7 @@ class MainWindow(QMainWindow):
         )
 
     def load_surf_report_into_tables(self):
-        # surf report
+        # Populate surf report into tables
         reports = get_surf_report()
         self.tabletRides.setRowCount(len(reports))
         self.tabletRides.setColumnCount(14)
@@ -226,7 +244,7 @@ class MainWindow(QMainWindow):
         self.tabletRides.verticalHeader().setVisible(False)
         self.tabletRides.cellDoubleClicked.connect(self.load_report)
 
-        # Gas report
+        # Populate Gas report into tables
         reports = get_gas_report()
         self.tabletGas_2.setRowCount(len(reports))
         self.tabletGas_2.setColumnCount(4)
@@ -250,6 +268,23 @@ class MainWindow(QMainWindow):
             total_cost += row[3]
         self.labLiters.setText(str(total_liters) + ' liters')
         self.labCost.setText(str(total_cost) + ' kr')
+
+        # Populate friends report into tables
+        reports = get_gas_report()
+        self.tabletGas_2.setRowCount(len(reports))
+        self.tabletGas_2.setColumnCount(4)
+        for row_index, row_data in enumerate(reports):
+            for column_index, value in enumerate(row_data):
+                self.tabletGas_2.setItem(row_index, column_index, QTableWidgetItem(str(value)))
+        self.tabletGas_2.setHorizontalHeaderLabels([
+            "ID",
+            "Date",
+            "liters",
+            "cost",
+        ])
+        self.tabletGas_2.resizeColumnsToContents()
+        self.tabletGas_2.verticalHeader().setVisible(False)
+
 
 
     def load_report(self, row, column):
