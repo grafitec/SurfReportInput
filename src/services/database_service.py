@@ -291,3 +291,6 @@ def load_ride_from_id(id):
         currentRowList.append(friendsList)
     connection.close()
     return currentRowList
+
+def process_TCX_into_database(path):
+    print(path)

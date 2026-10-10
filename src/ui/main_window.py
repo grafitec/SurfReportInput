@@ -1,5 +1,5 @@
 from PyQt6 import uic
-from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog
 from PyQt6.QtCore import QDate
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
@@ -9,6 +9,7 @@ from services.database_service import get_next_id
 from services.database_service import load_ride_from_id
 from services.database_service import save_location_into_database
 from services.database_service import get_location_from_database
+from services.database_service import process_TCX_into_database
 
 class LocationDialog(QDialog):
     def __init__(self):
@@ -25,6 +26,7 @@ class MainWindow(QMainWindow):
         self.btnSendSurfReport.clicked.connect(self.send_surf_report)
         self.btnSendGasReport.clicked.connect(self.send_gas_report)
         self.btnReset.clicked.connect(self.resetUI)
+        self.btnBrowseCtx.clicked.connect(self.browse_file)
 
         self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocationPopUp([self.cmbStartPoint]))
 
@@ -84,6 +86,17 @@ class MainWindow(QMainWindow):
         for location in reversed(locations):
             locationList.append(location[1])
         self.cmbStartPoint.addItems(locationList)
+
+    def browse_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select TCX File",
+            "",
+            "TCX Files (*.tcx);;All Files (*)"
+        )
+
+        if file_path:
+            self.txtCtxPath.setText(file_path)
 
     def validate_surf_form(self):
         interrupt = False
@@ -192,6 +205,9 @@ class MainWindow(QMainWindow):
 
         # Update database UI
         self.load_surf_report_into_tables()
+
+        # Process TCX data
+        process_TCX_into_database(ctxPath)
 
 
         if self.currentID == 0:

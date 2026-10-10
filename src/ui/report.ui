@@ -798,7 +798,7 @@
                     <item>
                      <widget class="QLabel" name="label_19">
                       <property name="text">
-                       <string>Upload CTX file from appel watch: </string>
+                       <string>Upload TCX file from appel watch: </string>
                       </property>
                      </widget>
                     </item>
