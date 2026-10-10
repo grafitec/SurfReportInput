@@ -6,10 +6,8 @@ from services.database_service import initiate_database
 import traceback
 
 # To do
-# Make StartPoint working
-
-
 # fixa browse knappen
+
 # Add support for mail submission
 # Add support for CTX files
 # Test out panda and some graphic element

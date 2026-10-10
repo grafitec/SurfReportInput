@@ -193,6 +193,44 @@ def save_gas_report(report):
     connection.close()
     return gas_id
 
+def save_location_into_database(location, gpsCor):
+    print(location)
+    print(gpsCor)
+    connection = sqlite3.connect(databasePath)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT INTO locations
+        (
+            startPoint,
+            longitud,
+            latitud
+        )
+        VALUES (?, ?, ?)
+    """,
+    (
+        location,
+        gpsCor.split(', ')[0],
+        gpsCor.split(', ')[1]
+    ))
+    connection.commit()
+    location_id = cursor.lastrowid
+    connection.close()
+    return location_id
+
+def get_location_from_database():
+    connection = sqlite3.connect(databasePath)
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT *
+        FROM locations
+        ORDER BY startPoint DESC
+    """)
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
+
+
 def get_surf_report():
     connection = sqlite3.connect(databasePath)
     cursor = connection.cursor()

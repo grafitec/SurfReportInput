@@ -750,17 +750,12 @@
                   <item>
                    <widget class="QLabel" name="label_13">
                     <property name="text">
-                     <string>Surf launch: </string>
+                     <string>Surf launch spot: </string>
                     </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QComboBox" name="cmbStartPoint">
-                    <item>
-                     <property name="text">
-                      <string>Alvik</string>
-                     </property>
-                    </item>
                     <item>
                      <property name="text">
                       <string/>

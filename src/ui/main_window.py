@@ -7,6 +7,8 @@ from services.database_service import get_surf_report
 from services.database_service import get_gas_report
 from services.database_service import get_next_id
 from services.database_service import load_ride_from_id
+from services.database_service import save_location_into_database
+from services.database_service import get_location_from_database
 
 class LocationDialog(QDialog):
     def __init__(self):
@@ -24,7 +26,7 @@ class MainWindow(QMainWindow):
         self.btnSendGasReport.clicked.connect(self.send_gas_report)
         self.btnReset.clicked.connect(self.resetUI)
 
-        self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocation([self.cmbStartPoint]))
+        self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocationPopUp([self.cmbStartPoint]))
 
 
         # variables
@@ -37,6 +39,9 @@ class MainWindow(QMainWindow):
         # Adding people
         self.rad2Friends.toggled.connect(self.friends_toggled)
         self.gboxAddPeople.setVisible(False)
+
+        # Add Surf launch spot
+        self.populateStartLocation()
 
         # Load existing tables
         self.load_surf_report_into_tables()
@@ -61,16 +66,24 @@ class MainWindow(QMainWindow):
         for widget in widgetList:
             widget.setStyleSheet("")
 
-    def addStartLocation(self, widget):
+    def addStartLocationPopUp(self, widget):
         if self.cmbStartPoint.currentText() == 'Add location':
             print('Add location')
             dialog = LocationDialog()
             if dialog.exec():
                 location = dialog.txtLocation.text()
                 gpsCor = dialog.txtGpsCor.text()
+                save_location_into_database(location, gpsCor)
+                self.cmbStartPoint.addItem(location)
+                self.cmbStartPoint.setCurrentText(location)
 
-                print(location)
-                print(gpsCor)
+    def populateStartLocation(self):
+        locations = get_location_from_database()
+        print(locations)
+        locationList = []
+        for location in reversed(locations):
+            locationList.append(location[1])
+        self.cmbStartPoint.addItems(locationList)
 
     def validate_surf_form(self):
         interrupt = False
