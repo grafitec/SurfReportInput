@@ -9,7 +9,14 @@ from services.database_service import get_next_id
 from services.database_service import load_ride_from_id
 from services.database_service import save_location_into_database
 from services.database_service import get_location_from_database
-from services.database_service import process_TCX_into_database
+
+import json
+import os
+from pathlib import Path
+import xml.etree.ElementTree as ET
+import traceback
+
+
 
 class LocationDialog(QDialog):
     def __init__(self):
@@ -200,26 +207,33 @@ class MainWindow(QMainWindow):
             'startPoint': startPoint,
             'friendsName': friendsName,
         }
-        # Send to database
-        ride_id = save_surf_report(rideData, self.currentID)
+        try:
+            # Send to database
+            ride_id = save_surf_report(rideData, self.currentID)
 
-        # Update database UI
-        self.load_surf_report_into_tables()
+            # Process TCX data
+            print('tcx_to_json')
+            json_file = self.tcx_to_json(ctxPath, ride_id)
+            rideData['ctxPath'] = json_file
+            print(json_file)
+            ride_id = save_surf_report(rideData, ride_id)
 
-        # Process TCX data
-        process_TCX_into_database(ctxPath)
+            # Update database UI
+            self.load_surf_report_into_tables()
 
 
-        if self.currentID == 0:
-            msg = f'Surf report rideID #{ride_id} saved successfully. \nCheck it out under the "Current records" tab'
-        else:
-            msg = f'Surf report rideID #{ride_id} updated successfully. \nCheck it out under the "Current records" tab'
+            if self.currentID == 0:
+                msg = f'Surf report rideID #{ride_id} saved successfully. \nCheck it out under the "Current records" tab'
+            else:
+                msg = f'Surf report rideID #{ride_id} updated successfully. \nCheck it out under the "Current records" tab'
 
-        QMessageBox.information(
-            self,
-            "Success",
-            msg
-        )
+            QMessageBox.information(
+                self,
+                "Success",
+                msg
+            )
+        except Exception:
+            traceback.print_exc()
 
         # Reset the form
         self.resetUI()
@@ -384,3 +398,41 @@ class MainWindow(QMainWindow):
         self.rad1LedLight.setChecked(False)
         for field in self.friendsFields:
             field.setText('')
+
+    def tcx_to_json(self, tcx_path, rideId):
+        TCX_NS = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+        NS = {"tcx": TCX_NS}
+        tcx_file = Path(tcx_path)
+        print(tcx_file)
+
+        root = ET.parse(tcx_file).getroot()
+
+        points = []
+
+        for point in root.findall(".//tcx:Trackpoint", NS):
+            time_el = point.find("tcx:Time", NS)
+            lat_el = point.find("tcx:Position/tcx:LatitudeDegrees", NS)
+            lon_el = point.find("tcx:Position/tcx:LongitudeDegrees", NS)
+
+            if time_el is None or time_el.text is None:
+                continue
+            if lat_el is None or lon_el is None:
+                continue
+
+            points.append({
+                "time": time_el.text,
+                "latitude": float(lat_el.text),
+                "longitude": float(lon_el.text),
+            })
+        json_path = (
+                Path(__file__).parent.parent.parent
+                / "data"
+                / "tcx"
+                / f"appleWatchRideData_rideId_{rideId}.json"
+        )
+        json_file = Path(json_path)
+        with json_file.open("w", encoding="utf-8") as f:
+            json.dump(points, f, indent=2, ensure_ascii=False)
+        path = str(json_file).replace('\\','/')
+        print(path)
+        return path
