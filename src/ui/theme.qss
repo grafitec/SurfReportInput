@@ -1,0 +1,283 @@
+/* =========================================================
+   Surf Report - Theme
+   Fargpalett: mint, bla-gron text och orange huvudknapp
+   Ikoner forutsatter att QSS-filen laddas fran projektroten
+   och att SVG-filerna ligger i ui/icons/.
+   ========================================================= */
+
+/* 1. Grundutseende */
+QMainWindow,
+QWidget#centralwidget {
+    background-color: #EAF7F5;
+    color: #243C45;
+    font-family: "Segoe UI";
+    font-size: 13px;
+}
+
+/* 2. Flikar */
+QTabWidget::pane {
+    background-color: transparent;
+    border: none;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background-color: transparent;
+    color: #607681;
+    padding: 12px 18px;
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+
+QTabBar::tab:selected {
+    color: #078F84;
+    font-weight: bold;
+    border-bottom: 3px solid #079B8C;
+}
+
+QTabBar::tab:hover:!selected {
+    color: #079B84;
+    background-color: #DFF2EF;
+}
+
+/* 3. Grundstil for formularets inmatningsfalt */
+QLineEdit,
+QComboBox,
+QDateEdit,
+QSpinBox,
+QDoubleSpinBox {
+    background-color: #FFFFFF;
+    color: #243C45;
+    border: 1px solid #D8E5E9;
+    border-radius: 9px;
+    min-height: 20px;
+}
+
+QLineEdit {
+    padding: 7px 9px;
+}
+
+QComboBox {
+    padding: 6px 30px 6px 10px;
+}
+
+QDateEdit {
+    padding: 5px 48px 5px 8px;
+}
+
+QSpinBox,
+QDoubleSpinBox {
+    padding: 5px 30px 5px 8px;
+}
+
+QLineEdit:focus,
+QComboBox:focus,
+QDateEdit:focus,
+QSpinBox:focus,
+QDoubleSpinBox:focus {
+    border: 2px solid #159F94;
+}
+
+/* 4. Dropdown-knapp och pil */
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+    background-color: #F0F7F6;
+    border-left: 1px solid #D5E5E3;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+QComboBox::drop-down:hover {
+    background-color: #D9EFEB;
+}
+
+QComboBox::down-arrow {
+    image: url(ui/icons/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+
+/* Dropdown-listans utseende */
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    color: #243C45;
+    selection-background-color: #DFF2EF;
+    selection-color: #087F75;
+    border: 1px solid #D8E5E9;
+    outline: none;
+}
+
+/* 5. Datumfaltets stegningsknappar och pilar */
+QDateEdit::up-button,
+QDateEdit::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 22px;
+    background-color: #F0F7F6;
+    border: none;
+    border-left: 1px solid #D5E5E3;
+    border-right: 1px solid #D5E5E3;
+}
+
+QDateEdit::up-button {
+    border-top: 1px solid #D5E5E3;
+    border-top-right-radius: 6px;
+}
+
+QDateEdit::down-button {
+    subcontrol-position: bottom right;
+    border-bottom: 1px solid #D5E5E3;
+    border-bottom-right-radius: 6px;
+}
+
+QDateEdit::up-button:hover,
+QDateEdit::down-button:hover {
+    background-color: #D9EFEB;
+}
+
+QDateEdit::up-arrow {
+    image: url(ui/icons/chevron-up.svg);
+    width: 12px;
+    height: 12px;
+}
+
+QDateEdit::down-arrow {
+    image: url(ui/icons/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+
+/* 6. Sifferfalt: upp- och nedknappar */
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 22px;
+    background-color: #F0F7F6;
+    border: none;
+    border-left: 1px solid #D5E5E3;
+    border-right: 1px solid #D5E5E3;
+    border-top: 1px solid #D5E5E3;
+    border-top-right-radius: 6px;
+}
+
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 22px;
+    background-color: #F0F7F6;
+    border: none;
+    border-left: 1px solid #D5E5E3;
+    border-right: 1px solid #D5E5E3;
+    border-bottom: 1px solid #D5E5E3;
+    border-bottom-right-radius: 6px;
+}
+
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover {
+    background-color: #D9EFEB;
+}
+
+QSpinBox::up-arrow,
+QDoubleSpinBox::up-arrow {
+    image: url(ui/icons/chevron-up.svg);
+    width: 12px;
+    height: 12px;
+}
+
+QSpinBox::down-arrow,
+QDoubleSpinBox::down-arrow {
+    image: url(ui/icons/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+
+/* 7. Gruppboxar */
+QGroupBox {
+    background-color: #F7FBFA;
+    border: 1px solid #D8EAE7;
+    border-radius: 10px;
+    margin-top: 12px;
+    padding: 12px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 5px;
+    color: #087F75;
+    font-weight: bold;
+}
+
+/* 8. Radioknappar och checkboxar */
+QRadioButton,
+QCheckBox {
+    color: #526773;
+    spacing: 7px;
+}
+
+/* 9. Knappar: standard */
+QPushButton {
+    background-color: #FFFFFF;
+    color: #526773;
+    border: 1px solid #D8E5E9;
+    border-radius: 10px;
+    padding: 9px 15px;
+}
+
+QPushButton:hover {
+    background-color: #E0F3EF;
+    border-color: #159F94;
+}
+
+QPushButton:pressed {
+    background-color: #CDE9E4;
+}
+
+/* Återställningsknapp */
+QPushButton#btnReset {
+    background-color: #FFFFFF;
+    color: #526773;
+    border: 1px solid #D8E5E9;
+}
+
+/* Huvudknapp: skicka surfrapport */
+QPushButton#btnSendSurfReport {
+    background-color: #FF792F;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-weight: bold;
+}
+
+QPushButton#btnSendSurfReport:hover {
+    background-color: #ED681F;
+}
+
+QPushButton#btnSendSurfReport:pressed {
+    background-color: #D95715;
+}
+
+/* Knapp for att valja TCX-fil */
+QPushButton#btnBrowseCtx {
+    background-color: #E4F4F1;
+    color: #087F75;
+    border: 1px solid #CBE6E1;
+}
+QWidget#centralwidget {
+    background-image: url(ui/images/surf-background.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+QFrame#frameSurfForm {
+    background-color: rgba(255, 255, 255, 238);
+    border: 1px solid #DCE8EB;
+    border-radius: 14px;
+}

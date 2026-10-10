@@ -1,0 +1,370 @@
+
+/* Grundutseende */
+QMainWindow,
+QWidget#centralwidget {
+    background-color: #EAF7F5;
+    color: #243C45;
+    font-family: "Segoe UI";
+    font-size: 13px;
+}
+
+/* Flikarnas innehåll */
+QTabWidget::pane {
+    background-color: transparent;
+    border: none;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background-color: transparent;
+    color: #607681;
+    padding: 12px 18px;
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+
+QTabBar::tab:selected {
+    color: #078F84;
+    font-weight: bold;
+    border-bottom: 3px solid #079B8C;
+}
+
+QTabBar::tab:hover:!selected {
+    color: #079B8C;
+    background-color: #DFF2EF;
+}
+
+/* Inmatningsfält */
+QLineEdit,
+QComboBox,
+QDateEdit,
+QSpinBox,
+QDoubleSpinBox {
+    background-color: white;
+    color: #243C45;
+    border: 1px solid #D8E5E9;
+    border-radius: 9px;
+    padding: 7px 9px;
+    min-height: 20px;
+}
+
+QLineEdit:focus,
+QComboBox:focus,
+QDateEdit:focus,
+QSpinBox:focus,
+QDoubleSpinBox:focus {
+    border: 2px solid #159F94;
+}
+
+/* Dropdown-listor */
+QComboBox QAbstractItemView {
+    background-color: white;
+    color: #243C45;
+    selection-background-color: #DFF2EF;
+    selection-color: #087F75;
+    border: 1px solid #D8E5E9;
+    outline: none;
+}
+
+/* Kommentarer och grupprutor */
+QGroupBox {
+    background-color: #F7FBFA;
+    border: 1px solid #D8EAE7;
+    border-radius: 10px;
+    margin-top: 12px;
+    padding: 12px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 5px;
+    color: #087F75;
+    font-weight: bold;
+}
+
+/* Radioknappar och checkboxar */
+QRadioButton,
+QCheckBox {
+    color: #526773;
+    spacing: 7px;
+}
+
+/* Vanliga knappar */
+QPushButton {
+    background-color: white;
+    color: #526773;
+    border: 1px solid #D8E5E9;
+    border-radius: 10px;
+    padding: 9px 15px;
+}
+
+QPushButton:hover {
+    background-color: #E0F3EF;
+    border-color: #159F94;
+}
+
+QPushButton:pressed {
+    background-color: #CDE9E4;
+}
+
+/* Återställningsknapp */
+QPushButton#btnReset {
+    background-color: white;
+    color: #526773;
+    border: 1px solid #D8E5E9;
+}
+
+/* Huvudknapp för surfrapport */
+QPushButton#btnSendSurfReport {
+    background-color: #FF792F;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-weight: bold;
+}
+
+QPushButton#btnSendSurfReport:hover {
+    background-color: #ED681F;
+}
+
+QPushButton#btnSendSurfReport:pressed {
+    background-color: #D95715;
+}
+
+/* Filväljaren */
+QPushButton#btnBrowseCtx {
+    background-color: #E4F4F1;
+    color: #087F75;
+    border: 1px solid #CBE6E1;
+}
+
+/* Dropdown-menyer */
+QComboBox {
+    padding: 6px 10px;
+    padding-right: 30px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 26px;
+    border: none;
+    border-left: 1px solid #E3ECEC;
+}
+
+QComboBox::down-arrow {
+    width: 9px;
+    height: 9px;
+}
+
+/* Datumfält */
+QDateEdit {
+    padding: 5px 8px;
+    padding-right: 48px;
+}
+
+QDateEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 25px;
+    border: none;
+}
+
+QDateEdit::down-arrow {
+    width: 9px;
+    height: 9px;
+}
+
+/* Sifferfält */
+QSpinBox,
+QDoubleSpinBox {
+    padding: 5px 8px;
+    padding-right: 38px;
+}
+
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 19px;
+    border: none;
+}
+
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 19px;
+    border: none;
+}
+
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover {
+    background-color: #E4F4F1;
+}
+
+/* Gemensam yta för dropdown-knappar */
+QComboBox::drop-down,
+QDateEdit::drop-down {
+    background-color: #F0F7F6;
+    border-left: 1px solid #D5E5E3;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+QComboBox::drop-down:hover,
+QDateEdit::drop-down:hover {
+    background-color: #D9EFEB;
+}
+
+
+
+QComboBox::down-arrow,
+QDateEdit::down-arrow {
+    image: url(ui/icons/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox::drop-down,
+QDateEdit::drop-down {
+    width: 28px;
+    background-color: #F0F7F6;
+    border-left: 1px solid #D5E5E3;
+}
+
+QComboBox::drop-down:hover,
+QDateEdit::drop-down:hover {
+    background-color: #D9EFEB;
+}
+
+
+/* ===== SIFFERFÄLT: UPP OCH NER ===== */
+
+QSpinBox::up-button,
+QDoubleSpinBox::up-button,
+QDateEdit::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 22px;
+    border: none;
+    background-color: #F0F7F6;
+}
+
+QSpinBox::down-button,
+QDoubleSpinBox::down-button,
+QDateEdit::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 22px;
+    border: none;
+    background-color: #F0F7F6;
+}
+
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover,
+QDateEdit::up-button:hover,
+QDateEdit::down-button:hover {
+    background-color: #D9EFEB;
+}
+
+/* Uppåtpilar */
+QSpinBox::up-arrow,
+QDoubleSpinBox::up-arrow,
+QDateEdit::up-arrow {
+    image: url(ui/icons/chevron-up.svg);
+    width: 12px;
+    height: 12px;
+}
+
+/* Nedåtpilar */
+QSpinBox::down-arrow,
+QDoubleSpinBox::down-arrow,
+QDateEdit::down-arrow {
+    image: url(ui/icons/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+
+QDateEdit {
+    padding-right: 48px;
+}
+
+QSpinBox,
+QDoubleSpinBox {
+    padding-right: 30px;
+}
+
+
+/* Inramad knappdel för datumfält */
+QDateEdit::up-button,
+QDateEdit::down-button {
+    background-color: #F0F7F6;
+    border: none;
+    width: 22px;
+}
+
+QDateEdit::up-button {
+    border-left: 1px solid #D5E5E3;
+    border-top: 1px solid #D5E5E3;
+    border-top-right-radius: 6px;
+}
+
+QDateEdit::down-button {
+    border-left: 1px solid #D5E5E3;
+    border-bottom: 1px solid #D5E5E3;
+    border-bottom-right-radius: 6px;
+}
+
+/* Inramad knappdel för sifferfält */
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    background-color: #F0F7F6;
+    border-left: 1px solid #D5E5E3;
+    border-top: 1px solid #D5E5E3;
+    border-top-right-radius: 6px;
+    width: 22px;
+}
+
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    background-color: #F0F7F6;
+    border-left: 1px solid #D5E5E3;
+    border-bottom: 1px solid #D5E5E3;
+    border-bottom-right-radius: 6px;
+    width: 22px;
+}
+
+/* Hover-effekt */
+QDateEdit::up-button:hover,
+QDateEdit::down-button:hover,
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover {
+    background-color: #D9EFEB;
+}
+
+/* Komplett högerkant på datum- och sifferknappar */
+
+QDateEdit::up-button,
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    border-right: 1px solid #D5E5E3;
+    border-top-right-radius: 6px;
+}
+
+QDateEdit::down-button,
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    border-right: 1px solid #D5E5E3;
+    border-bottom-right-radius: 6px;
+}
+
+

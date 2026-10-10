@@ -212,11 +212,12 @@ class MainWindow(QMainWindow):
             ride_id = save_surf_report(rideData, self.currentID)
 
             # Process TCX data
-            print('tcx_to_json')
-            json_file = self.tcx_to_json(ctxPath, ride_id)
-            rideData['ctxPath'] = json_file
-            print(json_file)
-            ride_id = save_surf_report(rideData, ride_id)
+            if not ctxPath == '':
+                print('tcx_to_json')
+                json_file = self.tcx_to_json(ctxPath, ride_id)
+                rideData['ctxPath'] = json_file
+                print(json_file)
+                ride_id = save_surf_report(rideData, ride_id)
 
             # Update database UI
             self.load_surf_report_into_tables()
