@@ -1,6 +1,10 @@
 from PyQt6 import uic
-from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog
-from PyQt6.QtCore import QDate
+from PyQt6.QtGui import QPixmap, QPainter
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog, QSizePolicy
+from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import QDate, QSize
+
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
 from services.database_service import get_surf_report
@@ -16,7 +20,50 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import traceback
 
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtCore import Qt, pyqtSignal
+from pathlib import Path
 
+from PyQt6.QtCore import QTimer
+
+from pathlib import Path
+from PyQt6.QtCore import QObject, QEvent, Qt
+
+
+class FileDropFilter(QObject):
+    def __init__(self, drop_zone, line_edit):
+        super().__init__(drop_zone)
+        self.drop_zone = drop_zone
+        self.line_edit = line_edit
+
+        self.drop_zone.setAcceptDrops(True)
+        self.drop_zone.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Type.DragEnter:
+            if event.mimeData().hasUrls():
+                event.acceptProposedAction()
+                return True
+
+        elif event.type() == QEvent.Type.DragMove:
+            if event.mimeData().hasUrls():
+                event.acceptProposedAction()
+                return True
+
+        elif event.type() == QEvent.Type.Drop:
+            for url in event.mimeData().urls():
+                path = url.toLocalFile()
+
+                if (
+                    Path(path).is_file()
+                    and Path(path).suffix.lower() == ".tcx"
+                ):
+                    self.line_edit.setText(path)
+                    self.line_edit.setToolTip(path)
+                    event.acceptProposedAction()
+                    return True
+
+        return False
 
 class LocationDialog(QDialog):
     def __init__(self):
@@ -28,6 +75,19 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi("ui/report.ui", self)
+        self.fileDropFilter = FileDropFilter(
+            self.uploadDropZone,
+            self.txtCtxPath
+        )
+        #self.setFixedSize(self.size())
+        self.setWindowIcon(QIcon("ui/icons/diagram.png"))
+
+
+
+        self.tabMain.setTabIcon(0, QIcon("ui/icons/document2.png"))
+        self.tabMain.setTabIcon(1, QIcon("ui/icons/gas-station2.png"))
+        self.tabMain.setTabIcon(2, QIcon("ui/icons/diagram.png"))
+        self.tabMain.setIconSize(QSize(16, 16))
 
         # main buttons
         self.btnSendSurfReport.clicked.connect(self.send_surf_report)
@@ -38,9 +98,10 @@ class MainWindow(QMainWindow):
         self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocationPopUp([self.cmbStartPoint]))
 
 
+
         # variables
         self.currentID = 0
-        self.friendsFields = [self.txtFriend1, self.txtFriend2, self.txtFriend3, self.txtFriend4, self.txtFriend5, self.txtFriend6, self.txtFriend7, self.txtFriend8]
+        self.friendsFields = [self.txtFriend1, self.txtFriend2, self.txtFriend3, self.txtFriend4, self.txtFriend5, self.txtFriend6]
 
         # clear validation
         self.clearVal()
@@ -56,6 +117,8 @@ class MainWindow(QMainWindow):
         self.load_surf_report_into_tables()
         nextId = get_next_id()
         self.labHeader.setText('Will add new row into database, rideID #'+str(nextId))
+
+
 
     def send_surf_report(self):
         # Checking if all fields are valid to continue
@@ -104,6 +167,8 @@ class MainWindow(QMainWindow):
 
         if file_path:
             self.txtCtxPath.setText(file_path)
+            self.btnBrowseCtx.hide()
+
 
     def validate_surf_form(self):
         interrupt = False
@@ -437,3 +502,4 @@ class MainWindow(QMainWindow):
         path = str(json_file).replace('\\','/')
         print(path)
         return path
+
