@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <g fill="none" stroke="#009E96" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Clipboard body -->
+    <path d="M151 105H125a27 27 0 0 0-27 27v257a27 27 0 0 0 27 27h145"/>
+    <path d="M268 105h87q27 0 27 27v13"/>
+    <path d="M382 145v68"/>
+    <path transform="translate(13 0)" d="M151 105a41 41 0 0 1 82 0h35a15 15 0 0 1 15 15v27a15 15 0 0 1-15 15H151a15 15 0 0 1-15-15v-27a15 15 0 0 1 15-15Z"/>
+    <path d="M151 196h184"/>
+    <path d="M151 246h93"/>
+    <path d="M151 296h58"/>
+    <!-- Add symbol -->
+    <circle cx="352" cy="351" r="91"/>
+    <path d="M352 303v96M304 351h96"/>
+  </g>
+</svg>

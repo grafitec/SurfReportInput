@@ -305,10 +305,10 @@ QLabel#labNewSurf {
     color: #24545B;
 }
 
-#uploadDropZone {
-    background-color: #ffffff;
-    border: 1px dashed #cbd9e8;
-    border-radius: 9px;
+QFrame#uploadDropZone {
+    background-color: rgba(245, 249, 255, 210);
+    border: 1px dashed #648BB5;
+    border-radius: 10px;
 }
 
 #labUpload {
@@ -365,4 +365,31 @@ QPushButton#btnBrowseCtx:focus {
     background-color: transparent;
     border: 0px;
     outline: none;
+}
+
+QPushButton#btnReset {
+    qproperty-icon: url("ui/icons/reset.svg");
+    qproperty-iconSize: 22px 22px;
+    text-align: left;
+    border-radius: 20px;
+    padding-left: 15px;
+    padding-right: 20px;
+}
+
+QFrame#frameNewEntry {
+    background-color: #E5F6F4;
+    color: #168F91;
+    border: 1px solid #D1EFEB;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+QLabel#labHeader {
+    background: transparent;
+    color: #009E96;
+    border: none;
+    font-weight: 700;
+    padding: 0px;
 }

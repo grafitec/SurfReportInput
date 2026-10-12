@@ -81,6 +81,18 @@ class MainWindow(QMainWindow):
         )
         #self.setFixedSize(self.size())
         self.setWindowIcon(QIcon("ui/icons/diagram.png"))
+        self.labUploadIcon = QLabel(self.uploadDropZone)
+        pixmap = QPixmap("ui/icons/upload.png")
+        self.labUploadIcon.setPixmap(
+            pixmap.scaled(
+                60, 60,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+        )
+        self.labUploadIcon.setFixedSize(40, 40)
+        self.labUploadIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.uploadDropZone.layout().insertWidget(0, self.labUploadIcon)
 
 
 
@@ -88,6 +100,14 @@ class MainWindow(QMainWindow):
         self.tabMain.setTabIcon(1, QIcon("ui/icons/gas-station2.png"))
         self.tabMain.setTabIcon(2, QIcon("ui/icons/diagram.png"))
         self.tabMain.setIconSize(QSize(16, 16))
+
+        self.labNewEntryIcon.setPixmap(
+            QPixmap("ui/icons/clipboard.svg").scaled(
+                25, 25,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+        )
 
         # main buttons
         self.btnSendSurfReport.clicked.connect(self.send_surf_report)
@@ -116,7 +136,7 @@ class MainWindow(QMainWindow):
         # Load existing tables
         self.load_surf_report_into_tables()
         nextId = get_next_id()
-        self.labHeader.setText('Will add new row into database, rideID #'+str(nextId))
+        self.labHeader.setText('New Entry · Record #'+str(nextId))
 
 
 
@@ -400,7 +420,7 @@ class MainWindow(QMainWindow):
 
         self.currentID = self.tabletRides.item(row, 0).text()
         self.tabMain.setCurrentIndex(0)
-        self.labHeader.setText('Will update row in database, rideID #' + str(self.currentID))
+        self.labHeader.setText('Update Entry · Record #' + str(self.currentID))
         self.btnSendSurfReport.setText('Update row #' + str(self.currentID))
         rideData = load_ride_from_id(self.currentID)
         print(rideData)
@@ -444,7 +464,7 @@ class MainWindow(QMainWindow):
         nextId = get_next_id()
         self.currentID = 0
 
-        self.labHeader.setText('Will add new row into database, rideID #'+str(nextId))
+        self.labHeader.setText('New Entry · Record #'+str(nextId))
         self.btnSendSurfReport.setText('Add surf report')
         date = QDate.fromString('2027-01-01', "yyyy-MM-dd")
         self.dateSurfRide.setDate(date)
