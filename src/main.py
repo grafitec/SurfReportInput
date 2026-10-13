@@ -8,6 +8,7 @@ from pathlib import Path
 
 # To do
 # Add support for mail submission
+# Lägga till ID och ride ID på TCX to Json
 
 # fråga ai om att sammanfatta ihop read me
 # transfer data from this year

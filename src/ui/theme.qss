@@ -43,12 +43,37 @@ QTabBar::tab:hover:!selected {
     background-color: #DFF2EF;
 }
 
+QPushButton#btnSendGasReport {
+    qproperty-icon: url("ui/icons/plus-white.svg");
+    qproperty-iconSize: 22px 22px;
+    text-align: left;
+    background-color: #FF792F;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 20px;
+    font-weight: bold;
+}
 QPushButton#btnSendSurfReport {
     qproperty-icon: url("ui/icons/plus-white.svg");
     qproperty-iconSize: 22px 22px;
     text-align: left;
-    padding-left: 0px;
-    padding-right: 20px;
+    background-color: #FF792F;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 20px;
+    font-weight: bold;
+}
+
+QPushButton#btnSendGasReport,
+QPushButton#btnSendSurfReport:hover {
+    background-color: #ED681F;
+}
+
+QPushButton#btnSendGasReport,
+QPushButton#btnSendSurfReport:pressed {
+    background-color: #D95715;
 }
 
 
@@ -264,24 +289,6 @@ QPushButton#btnReset {
     border: 1px solid #D8E5E9;
 }
 
-/* Huvudknapp: skicka surfrapport */
-QPushButton#btnSendSurfReport {
-    background-color: #FF792F;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 20px;
-    padding: 12px 20px;
-    font-weight: bold;
-}
-
-QPushButton#btnSendSurfReport:hover {
-    background-color: #ED681F;
-}
-
-QPushButton#btnSendSurfReport:pressed {
-    background-color: #D95715;
-}
-
 /* Knapp for att valja TCX-fil */
 QPushButton#btnBrowseCtx {
     background-color: #E4F4F1;
@@ -293,13 +300,18 @@ QWidget#centralwidget {
     background-position: center;
     background-repeat: no-repeat;
 }
-
+QFrame#frameGasForm,
+QFrame#frameRecordsForm,
 QFrame#frameSurfForm {
     background-color: rgba(255, 255, 255, 238);
     border: 1px solid rgba(220, 232, 235, 220);
     border-radius: 14px;
 }
 
+QLabel#labLiters_2,
+QLabel#labCost_2,
+QLabel#labRecords,
+QLabel#labNewGas,
 QLabel#labNewSurf {
     font-weight: 700;
     color: #24545B;

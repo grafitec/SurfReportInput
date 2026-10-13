@@ -1,9 +1,9 @@
 from PyQt6 import uic
 from PyQt6.QtGui import QPixmap, QPainter
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog, QSizePolicy
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect
 from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import QDate, QSize
+from PyQt6.QtCore import QDate, QSize, QPropertyAnimation
 
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
@@ -108,6 +108,9 @@ class MainWindow(QMainWindow):
                 Qt.TransformationMode.SmoothTransformation
             )
         )
+
+        # Animations
+        #self.tabMain.currentChanged.connect(self.on_tab_changed)
 
         # main buttons
         self.btnSendSurfReport.clicked.connect(self.send_surf_report)
@@ -523,3 +526,18 @@ class MainWindow(QMainWindow):
         print(path)
         return path
 
+    def on_tab_changed(self, index):
+        widget = self.tabMain.widget(index)
+        self.fade_in(widget)
+
+    def fade_in(self, widget):
+        effect = QGraphicsOpacityEffect(widget)
+        widget.setGraphicsEffect(effect)
+
+        animation = QPropertyAnimation(effect, b"opacity", self)
+        animation.setDuration(250)
+        animation.setStartValue(0.0)
+        animation.setEndValue(1.0)
+
+        self._fade_animation = animation
+        animation.start()
