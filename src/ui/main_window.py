@@ -14,6 +14,8 @@ from services.database_service import load_ride_from_id
 from services.database_service import save_location_into_database
 from services.database_service import get_location_from_database
 
+from services.analytics_service import runAnalytics
+
 import json
 import os
 from pathlib import Path
@@ -117,6 +119,7 @@ class MainWindow(QMainWindow):
         self.btnSendGasReport.clicked.connect(self.send_gas_report)
         self.btnReset.clicked.connect(self.resetUI)
         self.btnBrowseCtx.clicked.connect(self.browse_file)
+        self.btnAnalytics.clicked.connect(runAnalytics)
 
         self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocationPopUp([self.cmbStartPoint]))
 
@@ -174,7 +177,6 @@ class MainWindow(QMainWindow):
 
     def populateStartLocation(self):
         locations = get_location_from_database()
-        print(locations)
         locationList = []
         for location in reversed(locations):
             locationList.append(location[1])
@@ -300,7 +302,7 @@ class MainWindow(QMainWindow):
             ride_id = save_surf_report(rideData, self.currentID)
 
             # Process TCX data
-            if not ctxPath == '':
+            if not 'Drop TCX file' in ctxPath:
                 print('tcx_to_json')
                 json_file = self.tcx_to_json(ctxPath, ride_id)
                 rideData['ctxPath'] = json_file
@@ -475,7 +477,7 @@ class MainWindow(QMainWindow):
         self.spnTimeOnWater.setValue(0)
         self.spnDistance.setValue(0)
         self.txtInstaLink.setText('')
-        self.txtCtxPath.setText('')
+        self.txtCtxPath.setText('Drop TCX file here or')
         self.cmbWeather.setCurrentText('')
         self.cmbSurfType.setCurrentText('')
         self.cmbTemperature.setCurrentText('')
@@ -493,11 +495,10 @@ class MainWindow(QMainWindow):
         NS = {"tcx": TCX_NS}
         tcx_file = Path(tcx_path)
         print(tcx_file)
-
         root = ET.parse(tcx_file).getroot()
 
         points = []
-
+        index = 0
         for point in root.findall(".//tcx:Trackpoint", NS):
             time_el = point.find("tcx:Time", NS)
             lat_el = point.find("tcx:Position/tcx:LatitudeDegrees", NS)
@@ -509,10 +510,14 @@ class MainWindow(QMainWindow):
                 continue
 
             points.append({
+                "id": float(1),
+                "index": int(index),
                 "time": time_el.text,
                 "latitude": float(lat_el.text),
                 "longitude": float(lon_el.text),
+
             })
+            index = index + 1
         json_path = (
                 Path(__file__).parent.parent.parent
                 / "data"
@@ -523,7 +528,6 @@ class MainWindow(QMainWindow):
         with json_file.open("w", encoding="utf-8") as f:
             json.dump(points, f, indent=2, ensure_ascii=False)
         path = str(json_file).replace('\\','/')
-        print(path)
         return path
 
     def on_tab_changed(self, index):

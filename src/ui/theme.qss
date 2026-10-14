@@ -66,13 +66,37 @@ QPushButton#btnSendSurfReport {
     font-weight: bold;
 }
 
-QPushButton#btnSendGasReport,
-QPushButton#btnSendSurfReport:hover {
+QPushButton#btnAnalytics {
+    qproperty-icon: url("ui/icons/diagram_white.png");
+    qproperty-iconSize: 22px 22px;
+    text-align: left;
+    background-color: #FF792F;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 20px;
+    font-weight: bold;
+}
+
+QPushButton#btnSendGasReport:hover {
     background-color: #ED681F;
 }
 
-QPushButton#btnSendGasReport,
+QPushButton#btnSendSurfReport:hover {
+    background-color: #ED681F;
+}
+QPushButton#btnAnalytics:hover {
+    background-color: #ED681F;
+}
+
+QPushButton#btnSendGasReport:pressed {
+    background-color: #D95715;
+}
+
 QPushButton#btnSendSurfReport:pressed {
+    background-color: #D95715;
+}
+QPushButton#btnAnalytics:pressed {
     background-color: #D95715;
 }
 
@@ -93,7 +117,7 @@ QDoubleSpinBox {
     color: #243C45;
     border: 1px solid #D8E5E9;
     border-radius: 9px;
-    min-height: 20px;
+    min-height: 15px;
 }
 
 QLineEdit {
