@@ -3,7 +3,6 @@ import sys
 from PyQt6.QtWidgets import QApplication
 from ui.main_window import MainWindow
 from services.database_service import initiate_database
-from services.mail_service import initiate_mail_client
 import traceback
 from pathlib import Path
 
@@ -13,6 +12,7 @@ from pathlib import Path
 # Kunna sortera och filtrera på rubrikerna
 # Lägga in en knapp för Columns för att kunna klicka bort vissa
 # Annan typsnitt
+# en process för instagram länkar
 
 # transfer data from this year
 # Test out panda and some graphic element
@@ -42,9 +42,6 @@ if __name__ == '__main__':
     try:
         # Build database
         initiate_database()
-
-        # Initiate mail
-        initiate_mail_client()
 
         # Build UI
         buildUI()

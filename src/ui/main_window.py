@@ -1,8 +1,9 @@
 from PyQt6 import uic
 from PyQt6.QtGui import QPixmap, QPainter
-from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect, QLabel, QGraphicsView, QGraphicsScene, QGraphicsProxyWidget, QWidget, QFrame
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect, QLabel, QMenu, QWidgetAction, QCheckBox, QPushButton, QMessageBox
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import QDate, QSize, QPropertyAnimation, QTimer, Qt, pyqtSignal, QObject, QEvent
+
 
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
@@ -12,6 +13,9 @@ from services.database_service import get_next_id
 from services.database_service import load_ride_from_id
 from services.database_service import save_location_into_database
 from services.database_service import get_location_from_database
+
+from services.mail_service import get_new_mails
+
 
 from services.analytics_service import runAnalytics
 
@@ -133,10 +137,34 @@ class MainWindow(QMainWindow):
 
         # Load existing tables
         self.tabletRides.setAlternatingRowColors(True)
+        self.tabletRides.horizontalHeader().setSortIndicatorShown(True)
+        self.tabletRides.horizontalHeader().setSectionsClickable(True)
         self.load_surf_report_into_tables()
         nextId = get_next_id()
         self.labHeader.setText('New Entry · Record #'+str(nextId))
+        #print("btnColumns finns:", hasattr(self, "btnColumns"))
+        #print("Hittad knapp:", self.findChild(QPushButton, "btnColumns"))
+        #self.setup_column_menu()
 
+        # Initiate mail
+        QTimer.singleShot(0, self.checkMails)
+
+
+    def checkMails(self):
+        self.dataFromMail = get_new_mails()
+        if not self.dataFromMail == []:
+            nextId = get_next_id()
+            msg = str(len(self.dataFromMail))+' new mail reports'
+            self.labMail.setText(str(len(self.dataFromMail))+' new mail on queue')
+            QMessageBox.information(
+                self,
+                "Newly arrived mails",
+                msg
+            )
+            self.labHeader.setText('New Entry from mail · Record #' + str(nextId))
+            self.labMail.setText(str(len(self.dataFromMail)-1)+' new mail on queue')
+
+            # Popuplate form
 
 
     def send_surf_report(self):
@@ -299,6 +327,8 @@ class MainWindow(QMainWindow):
             'startPoint': startPoint,
             'friendsName': friendsName,
         }
+        json_string = json.dumps(rideData, indent=4)
+        print(json_string)
         try:
             # Send to database
             ride_id = save_surf_report(rideData, self.currentID)
@@ -355,6 +385,7 @@ class MainWindow(QMainWindow):
     def load_surf_report_into_tables(self):
         # Populate surf report into tables
         reports = get_surf_report()
+        self.tabletRides.setSortingEnabled(False)
         self.tabletRides.setRowCount(len(reports))
         self.tabletRides.setColumnCount(14)
         for row_index, row_data in enumerate(reports):
@@ -376,9 +407,13 @@ class MainWindow(QMainWindow):
             "LED",
             "Start Point"
         ])
+        for row_index, row_data in enumerate(reports):
+            self.tabletRides.setItem(row_index, 0, NumericTableWidgetItem(str(row_data[0])))
+            self.tabletRides.setItem(row_index, 8, NumericTableWidgetItem(str(row_data[8])))
         self.tabletRides.resizeColumnsToContents()
         self.tabletRides.verticalHeader().setVisible(False)
         self.tabletRides.cellDoubleClicked.connect(self.load_report)
+        self.tabletRides.setSortingEnabled(True)
 
         # Populate Gas report into tables
         reports = get_gas_report()
@@ -420,6 +455,36 @@ class MainWindow(QMainWindow):
         ])
         self.tabletGas_2.resizeColumnsToContents()
         self.tabletGas_2.verticalHeader().setVisible(False)
+
+    def setup_column_menu(self):
+        self.column_menu = QMenu(self)
+
+        for col in range(self.tabletRides.columnCount()):
+            header = self.tabletRides.horizontalHeaderItem(col)
+
+            if header is None:
+                continue
+
+            checkbox = QCheckBox(header.text(), self.column_menu)
+            checkbox.setChecked(not self.tabletRides.isColumnHidden(col))
+
+            checkbox.toggled.connect(
+                lambda checked, c=col:
+                self.tabletRides.setColumnHidden(c, not checked)
+            )
+
+            action = QWidgetAction(self.column_menu)
+            action.setDefaultWidget(checkbox)
+            self.column_menu.addAction(action)
+
+        self.btnColumns.clicked.connect(self.show_column_menu)
+
+    def show_column_menu(self):
+        self.column_menu.exec(
+            self.btnColumns.mapToGlobal(
+                self.btnColumns.rect().bottomLeft()
+            )
+        )
 
 
 
@@ -548,3 +613,9 @@ class MainWindow(QMainWindow):
         self._fade_animation = animation
         animation.start()
 
+class NumericTableWidgetItem(QTableWidgetItem):
+    def __lt__(self, other):
+        try:
+            return float(self.text()) < float(other.text())
+        except ValueError:
+            return super().__lt__(other)

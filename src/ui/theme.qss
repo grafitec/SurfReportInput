@@ -423,6 +423,7 @@ QFrame#frameNewEntry {
     font-weight: 500;
 }
 
+QLabel#labMail,
 QLabel#labHeader {
     background: transparent;
     color: #009E96;
