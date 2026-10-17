@@ -1,10 +1,8 @@
 from PyQt6 import uic
 from PyQt6.QtGui import QPixmap, QPainter
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect, QLabel, QGraphicsView, QGraphicsScene, QGraphicsProxyWidget, QWidget, QFrame
 from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import QDate, QSize, QPropertyAnimation
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QDate, QSize, QPropertyAnimation, QTimer, Qt, pyqtSignal, QObject, QEvent
 
 from services.database_service import save_surf_report
 from services.database_service import save_gas_report
@@ -17,20 +15,12 @@ from services.database_service import get_location_from_database
 
 from services.analytics_service import runAnalytics
 
+from ui.analytics_window import AnalyticsWindow
+
 import json
-import os
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import traceback
-
-from PyQt6.QtWidgets import QLabel
-from PyQt6.QtCore import Qt, pyqtSignal
-from pathlib import Path
-
-from PyQt6.QtCore import QTimer
-
-from pathlib import Path
-from PyQt6.QtCore import QObject, QEvent, Qt
 
 
 class FileDropFilter(QObject):
@@ -73,135 +63,6 @@ class LocationDialog(QDialog):
         super().__init__()
         uic.loadUi("ui/dialog_surf_launch.ui", self)
         self.btnOkay.clicked.connect(self.accept)
-
-class AnalyticsWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        uic.loadUi("ui/analytics_window.ui", self)
-
-        # Buttons
-        self.btnFullscreen.clicked.connect(self.toggle_fullscreen)
-
-        # Skapa bakgrundsbilden
-        self.backgroundLabel = QLabel(self.centralwidget_analytic)
-        self.backgroundLabel.setAlignment(
-            Qt.AlignmentFlag.AlignCenter
-        )
-        self.backgroundLabel.setScaledContents(False)
-
-        # Ladda bilden
-        image_path = Path(__file__).resolve().parent / \
-            "images/surf-background_big.png"
-        self.backgroundPixmap = QPixmap(str(image_path))
-
-        if self.backgroundPixmap.isNull():
-            print(f"Kunde inte ladda bilden: {image_path}")
-
-        # Placera bakgrunden bakom övrigt innehåll
-        self.backgroundLabel.lower()
-        self.update_background()
-
-        self.setup_proportional_scaling()
-        self.resize(1536, 864)
-
-        QTimer.singleShot(0, self.update_background)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-
-        if hasattr(self, "graphics_view"):
-            self.scale_design()
-
-
-    def update_background(self):
-        if self.backgroundPixmap.isNull():
-            return
-
-        size = self.centralwidget_analytic.size()
-        self.backgroundLabel.setGeometry(
-            self.centralwidget_analytic.rect()
-        )
-
-        scaled = self.backgroundPixmap.scaled(
-            size,
-            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-            Qt.TransformationMode.SmoothTransformation
-        )
-
-        # Beskär mitten så att bilden fyller hela ytan
-        x = (scaled.width() - size.width()) // 2
-        y = (scaled.height() - size.height()) // 2
-
-        cropped = scaled.copy(
-            x, y, size.width(), size.height()
-        )
-
-        self.backgroundLabel.setPixmap(cropped)
-        self.backgroundLabel.lower()
-
-    def toggle_fullscreen(self):
-        if self.isFullScreen():
-            self.showNormal()
-        else:
-            self.showFullScreen()
-
-    def setup_proportional_scaling(self):
-        # Originalstorleken på din design
-        self.design_width = 1536
-        self.design_height = 864
-
-        # Spara den befintliga designen
-        self.design_widget = self.centralwidget_analytic
-
-        # Frigör den från QMainWindow innan den placeras i proxyn
-        self.takeCentralWidget()
-
-        self.design_widget.setParent(None)
-        self.design_widget.setFixedSize(
-            self.design_width,
-            self.design_height
-        )
-
-        self.scene = QGraphicsScene(self)
-        self.scene.setSceneRect(
-            0, 0, self.design_width, self.design_height
-        )
-
-        self.proxy = self.scene.addWidget(self.design_widget)
-
-        self.graphics_view = QGraphicsView(self.scene, self)
-        self.graphics_view.setFrameShape(
-            QGraphicsView.Shape.NoFrame
-        )
-        self.graphics_view.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.graphics_view.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.graphics_view.setAlignment(
-            Qt.AlignmentFlag.AlignCenter
-        )
-        self.graphics_view.setStyleSheet(
-            "QGraphicsView { border: none; background: transparent; }"
-        )
-
-        self.setCentralWidget(self.graphics_view)
-        QTimer.singleShot(0, self.scale_design)
-        self.scale_design()
-
-
-
-    def scale_design(self):
-        if not hasattr(self, "graphics_view"):
-            return
-
-        self.graphics_view.resetTransform()
-
-        self.graphics_view.fitInView(
-            self.scene.sceneRect(),
-            Qt.AspectRatioMode.KeepAspectRatio
-        )
 
 
 class MainWindow(QMainWindow):
@@ -317,6 +178,7 @@ class MainWindow(QMainWindow):
         try:
             self.analyticsWindow = AnalyticsWindow()
             self.analyticsWindow.show()
+
 
         except Exception:
             traceback.print_exc()
@@ -684,3 +546,4 @@ class MainWindow(QMainWindow):
 
         self._fade_animation = animation
         animation.start()
+

@@ -5,11 +5,16 @@ import traceback
 
 databasePath = "../data/surfReport.db"
 
+
+
 def runAnalytics():
     try:
         #get_rides_per_month()
         #total_fuel_cost()
-        type_of_surf()
+        #chart = ChartWidget()
+        #type_of_surf()
+        return chart
+
     except Exception:
         traceback.print_exc()
 
