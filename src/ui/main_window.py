@@ -132,6 +132,7 @@ class MainWindow(QMainWindow):
         self.populateStartLocation()
 
         # Load existing tables
+        self.tabletRides.setAlternatingRowColors(True)
         self.load_surf_report_into_tables()
         nextId = get_next_id()
         self.labHeader.setText('New Entry · Record #'+str(nextId))

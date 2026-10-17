@@ -430,3 +430,89 @@ QLabel#labHeader {
     font-weight: 700;
     padding: 0px;
 }
+
+/* Huvudtabell */
+QTableWidget#tabletRides {
+    background-color: #FFFFFF;
+    alternate-background-color: #F5FAFB;
+    color: #244B5A;
+    border: 1px solid #DCE9EC;
+    border-radius: 10px;
+    gridline-color: #E6EEF0;
+    selection-background-color: #D5F3EF;
+    selection-color: #087F79;
+}
+QTableWidget::item {
+    background-color: transparent;
+    padding: 7px;
+}
+
+/* Tabellrubriker */
+QHeaderView::section {
+background-color: #EAF5F5;
+color: #245765;
+border: none;
+border-bottom: 2px solid #B8DDDA;
+border-right: 1px solid #DCE9EC;
+
+padding: 10px 8px;
+font-weight: bold;
+font-size: 12px;
+
+}
+
+/* Hörnet mellan rubrikerna */
+QTableCornerButton::section {
+background-color: #EAF5F5;
+border: none;
+border-bottom: 2px solid #B8DDDA;
+}
+
+/* Vertikal scrollbar */
+QScrollBar {
+background: #F3F8FA;
+width: 10px;
+margin: 3px;
+border-radius: 5px;
+}
+
+QScrollBar::handle {
+background: #B7D5D9;
+min-height: 30px;
+border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+background: #72BDB8;
+}
+
+QScrollBar::add-line,
+QScrollBar::sub-line {
+height: 0px;
+border: none;
+}
+
+/* Horisontell scrollbar */
+QScrollBar {
+background: #F3F8FA;
+height: 10px;
+margin: 3px;
+border-radius: 5px;
+}
+
+QScrollBar::handle {
+background: #B7D5D9;
+min-width: 30px;
+border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
+background: #72BDB8;
+}
+
+QScrollBar::add-line,
+QScrollBar::sub-line {
+width: 0px;
+border: none;
+}
+

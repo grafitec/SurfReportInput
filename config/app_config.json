@@ -1,0 +1,5 @@
+{
+    "email": "mikael@example.com",
+    "imap_server": "imap.gmail.com",
+    "subject_filter": "SURF_REPORT"
+}
