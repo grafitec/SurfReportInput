@@ -1,6 +1,6 @@
 from PyQt6 import uic
 from PyQt6.QtGui import QPixmap, QPainter
-from PyQt6.QtWidgets import QMainWindow, QMessageBox, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect, QLabel, QMenu, QWidgetAction, QCheckBox, QPushButton, QMessageBox
+from PyQt6.QtWidgets import QMainWindow, QApplication, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect, QLabel, QMenu, QWidgetAction, QCheckBox, QPushButton, QMessageBox
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import QDate, QSize, QPropertyAnimation, QTimer, Qt, pyqtSignal, QObject, QEvent
 
@@ -25,6 +25,7 @@ import json
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import traceback
+import os
 
 
 class FileDropFilter(QObject):
@@ -142,12 +143,12 @@ class MainWindow(QMainWindow):
         self.load_surf_report_into_tables()
         nextId = get_next_id()
         self.labHeader.setText('New Entry · Record #'+str(nextId))
-        #print("btnColumns finns:", hasattr(self, "btnColumns"))
-        #print("Hittad knapp:", self.findChild(QPushButton, "btnColumns"))
-        #self.setup_column_menu()
+        print("btnColumns finns:", hasattr(self, "btnColumns"))
+        print("Hittad knapp:", self.findChild(QPushButton, "btnColumns"))
+        self.setup_column_menu()
 
         # Initiate mail
-        QTimer.singleShot(0, self.checkMails)
+        #QTimer.singleShot(0, self.checkMails)
 
 
     def checkMails(self):
@@ -457,6 +458,13 @@ class MainWindow(QMainWindow):
         self.tabletGas_2.verticalHeader().setVisible(False)
 
     def setup_column_menu(self):
+        hidden_columns = {
+            "Instagram",
+            "Injuries",
+            "Temperature",
+            "CTX",
+        }
+
         self.column_menu = QMenu(self)
 
         for col in range(self.tabletRides.columnCount()):
@@ -464,9 +472,13 @@ class MainWindow(QMainWindow):
 
             if header is None:
                 continue
-
+            name = header.text()
             checkbox = QCheckBox(header.text(), self.column_menu)
             checkbox.setChecked(not self.tabletRides.isColumnHidden(col))
+
+            checked = name not in hidden_columns
+            checkbox.setChecked(checked)
+            self.tabletRides.setColumnHidden(col, not checked)
 
             checkbox.toggled.connect(
                 lambda checked, c=col:
@@ -561,41 +573,44 @@ class MainWindow(QMainWindow):
         TCX_NS = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
         NS = {"tcx": TCX_NS}
         tcx_file = Path(tcx_path)
-        print(tcx_file)
-        root = ET.parse(tcx_file).getroot()
+        if os.path.exists(tcx_file):
+            print(tcx_file)
+            root = ET.parse(tcx_file).getroot()
 
-        points = []
-        index = 0
-        for point in root.findall(".//tcx:Trackpoint", NS):
-            time_el = point.find("tcx:Time", NS)
-            lat_el = point.find("tcx:Position/tcx:LatitudeDegrees", NS)
-            lon_el = point.find("tcx:Position/tcx:LongitudeDegrees", NS)
+            points = []
+            index = 0
+            for point in root.findall(".//tcx:Trackpoint", NS):
+                time_el = point.find("tcx:Time", NS)
+                lat_el = point.find("tcx:Position/tcx:LatitudeDegrees", NS)
+                lon_el = point.find("tcx:Position/tcx:LongitudeDegrees", NS)
 
-            if time_el is None or time_el.text is None:
-                continue
-            if lat_el is None or lon_el is None:
-                continue
+                if time_el is None or time_el.text is None:
+                    continue
+                if lat_el is None or lon_el is None:
+                    continue
 
-            points.append({
-                "id": float(1),
-                "index": int(index),
-                "time": time_el.text,
-                "latitude": float(lat_el.text),
-                "longitude": float(lon_el.text),
+                points.append({
+                    "id": float(1),
+                    "index": int(index),
+                    "time": time_el.text,
+                    "latitude": float(lat_el.text),
+                    "longitude": float(lon_el.text),
 
-            })
-            index = index + 1
-        json_path = (
-                Path(__file__).parent.parent.parent
-                / "data"
-                / "tcx"
-                / f"appleWatchRideData_rideId_{rideId}.json"
-        )
-        json_file = Path(json_path)
-        with json_file.open("w", encoding="utf-8") as f:
-            json.dump(points, f, indent=2, ensure_ascii=False)
-        path = str(json_file).replace('\\','/')
-        return path
+                })
+                index = index + 1
+            json_path = (
+                    Path(__file__).parent.parent.parent
+                    / "data"
+                    / "tcx"
+                    / f"appleWatchRideData_rideId_{rideId}.json"
+            )
+            json_file = Path(json_path)
+            with json_file.open("w", encoding="utf-8") as f:
+                json.dump(points, f, indent=2, ensure_ascii=False)
+            path = str(json_file).replace('\\','/')
+            return path
+        else:
+            return None
 
     def on_tab_changed(self, index):
         widget = self.tabMain.widget(index)

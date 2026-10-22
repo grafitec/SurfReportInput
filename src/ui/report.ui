@@ -56,7 +56,7 @@
       <item>
        <widget class="QTabWidget" name="tabMain">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tabSurfReport">
          <property name="sizePolicy">
@@ -1665,7 +1665,7 @@
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton">
+                  <widget class="QPushButton" name="btnColumns">
                    <property name="text">
                     <string>Columns</string>
                    </property>
@@ -1713,7 +1713,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

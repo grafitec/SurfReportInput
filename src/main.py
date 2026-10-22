@@ -9,11 +9,13 @@ from pathlib import Path
 # To do
 # Add support for mail submission
 # Tabeller
-# Kunna sortera och filtrera på rubrikerna
-# Lägga in en knapp för Columns för att kunna klicka bort vissa
+# Kunna filtrera på rubrikerna
 # Annan typsnitt
 # en process för instagram länkar
 
+# Test to run n8n for mail trigger and run a code that process the TCX files
+# When TCX process also make route picture as strava stile
+# When TCX process also make a video when the route writes out
 # transfer data from this year
 # Test out panda and some graphic element
 # Make pages
@@ -21,6 +23,7 @@ from pathlib import Path
 # Option to export the data to Excel
 # Option to export the analyst to pdf
 # Send report mail for this month with analytics
+
 
 
 def buildUI():

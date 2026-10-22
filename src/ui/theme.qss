@@ -282,8 +282,7 @@ QGroupBox::title {
 }
 
 /* 8. Radioknappar och checkboxar */
-QRadioButton,
-QCheckBox {
+QRadioButton {
     color: #526773;
     spacing: 7px;
 }
@@ -515,5 +514,28 @@ QScrollBar::add-line,
 QScrollBar::sub-line {
 width: 0px;
 border: none;
+}
+
+QMenu QCheckBox {
+color: #244B5A;
+spacing: 9px;
+padding: 5px 10px;
+min-height: 10px;
+/*background-color: transparent;*/
+}
+
+
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #8C9BA1;
+    border-radius: 4px;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #FFFFFF;
+    border: 1px solid #8C9BA1;
+    image: url(ui/icons/checkbox.svg);
 }
 
