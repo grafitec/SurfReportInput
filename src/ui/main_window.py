@@ -10,11 +10,12 @@ from services.database_service import save_gas_report
 from services.database_service import get_surf_report
 from services.database_service import get_gas_report
 from services.database_service import get_next_id
-from services.database_service import load_ride_from_id
+from services.database_service import load_database_ride_from_id
 from services.database_service import save_location_into_database
 from services.database_service import get_location_from_database
 
 from services.mail_service import get_new_mails
+from services.mail_service import move_mail
 
 
 from services.analytics_service import runAnalytics
@@ -124,6 +125,7 @@ class MainWindow(QMainWindow):
 
         # variables
         self.currentID = 0
+        self.dataFromMail = []
         self.friendsFields = [self.txtFriend1, self.txtFriend2, self.txtFriend3, self.txtFriend4, self.txtFriend5, self.txtFriend6]
 
         # clear validation
@@ -143,18 +145,15 @@ class MainWindow(QMainWindow):
         self.load_surf_report_into_tables()
         nextId = get_next_id()
         self.labHeader.setText('New Entry · Record #'+str(nextId))
-        print("btnColumns finns:", hasattr(self, "btnColumns"))
-        print("Hittad knapp:", self.findChild(QPushButton, "btnColumns"))
         self.setup_column_menu()
 
         # Initiate mail
-        #QTimer.singleShot(0, self.checkMails)
+        QTimer.singleShot(0, self.checkMails)
 
 
     def checkMails(self):
         self.dataFromMail = get_new_mails()
         if not self.dataFromMail == []:
-            nextId = get_next_id()
             msg = str(len(self.dataFromMail))+' new mail reports'
             self.labMail.setText(str(len(self.dataFromMail))+' new mail on queue')
             QMessageBox.information(
@@ -162,10 +161,19 @@ class MainWindow(QMainWindow):
                 "Newly arrived mails",
                 msg
             )
-            self.labHeader.setText('New Entry from mail · Record #' + str(nextId))
-            self.labMail.setText(str(len(self.dataFromMail)-1)+' new mail on queue')
+            self.proceed_mail()
 
-            # Popuplate form
+    def proceed_mail(self):
+        nextId = get_next_id()
+        self.labHeader.setText('New Entry from mail · Record #' + str(nextId))
+        if len(self.dataFromMail) > 1:
+            self.labMail.setText(str(len(self.dataFromMail)-1)+' new mail on queue')
+        else:
+            self.labMail.setText('No new mail on queue')
+
+        # Popuplate form
+        self.load_report(self.dataFromMail[0])
+        self.btnReset.setEnabled(False)
 
 
     def send_surf_report(self):
@@ -188,7 +196,6 @@ class MainWindow(QMainWindow):
 
     def addStartLocationPopUp(self, widget):
         if self.cmbStartPoint.currentText() == 'Add location':
-            print('Add location')
             dialog = LocationDialog()
             if dialog.exec():
                 location = dialog.txtLocation.text()
@@ -329,17 +336,14 @@ class MainWindow(QMainWindow):
             'friendsName': friendsName,
         }
         json_string = json.dumps(rideData, indent=4)
-        print(json_string)
         try:
             # Send to database
             ride_id = save_surf_report(rideData, self.currentID)
 
             # Process TCX data
             if not 'Drop TCX file' in ctxPath:
-                print('tcx_to_json')
                 json_file = self.tcx_to_json(ctxPath, ride_id)
                 rideData['ctxPath'] = json_file
-                print(json_file)
                 ride_id = save_surf_report(rideData, ride_id)
 
             # Update database UI
@@ -359,8 +363,29 @@ class MainWindow(QMainWindow):
         except Exception:
             traceback.print_exc()
 
-        # Reset the form
-        self.resetUI()
+        # After submission
+        prepear_for_new_sub = False
+        if self.dataFromMail:
+            mailId = self.dataFromMail[0]['mailId']
+            move_mail(mailId)
+            if len(self.dataFromMail) > 1:
+                self.dataFromMail.pop(0)
+            else:
+                self.dataFromMail = []
+
+            if self.dataFromMail:
+                self.proceed_mail()
+            else:
+                prepear_for_new_sub = True
+        else:
+            prepear_for_new_sub = True
+
+        if prepear_for_new_sub:
+            # Reset the form
+            self.resetUI()
+            self.btnReset.setEnabled(True)
+            self.labMail.setText('')
+
 
 
     def process_gas_data(self):
@@ -413,7 +438,7 @@ class MainWindow(QMainWindow):
             self.tabletRides.setItem(row_index, 8, NumericTableWidgetItem(str(row_data[8])))
         self.tabletRides.resizeColumnsToContents()
         self.tabletRides.verticalHeader().setVisible(False)
-        self.tabletRides.cellDoubleClicked.connect(self.load_report)
+        self.tabletRides.cellDoubleClicked.connect(self.load_report_from_edited)
         self.tabletRides.setSortingEnabled(True)
 
         # Populate Gas report into tables
@@ -500,33 +525,36 @@ class MainWindow(QMainWindow):
 
 
 
-    def load_report(self, row, column):
-
+    def load_report_from_edited(self, row, column):
         self.currentID = self.tabletRides.item(row, 0).text()
         self.tabMain.setCurrentIndex(0)
         self.labHeader.setText('Update Entry · Record #' + str(self.currentID))
         self.btnSendSurfReport.setText('Update row #' + str(self.currentID))
-        rideData = load_ride_from_id(self.currentID)
-        print(rideData)
-        date = QDate.fromString(rideData[1], "yyyy-MM-dd")
+        rideData = load_database_ride_from_id(self.currentID)
+        self.load_report(rideData)
+
+
+    def load_report(self, data):
+        date = QDate.fromString(data['date'], "yyyy-MM-dd")
         self.dateSurfRide.setDate(date)
-        self.cmbWeather.setCurrentText(rideData[2])
-        self.cmbAnyInjuries.setCurrentText(rideData[4])
-        self.cmbTemperature.setCurrentText(rideData[5])
-        self.spnTimeOnWater.setValue(rideData[6])
-        self.txtComment.setText(rideData[7])
-        self.spnDistance.setValue(rideData[8])
-        self.txtInstaLink.setText(rideData[9])
-        self.txtCtxPath.setText(rideData[10])
-        self.cmbSurfType.setCurrentText(rideData[11])
-        self.cmbStartPoint.setCurrentText(rideData[13])
-        if rideData[3] == 1:
+        self.cmbWeather.setCurrentText(data['weather'])
+        self.cmbAnyInjuries.setCurrentText(data['injuries'])
+        self.cmbTemperature.setCurrentText(data['temperature'])
+        self.spnTimeOnWater.setValue(data['timeOnWater'])
+        self.txtComment.setText(data['comments'])
+        self.spnDistance.setValue(data['distance'])
+        if 'instaLink' in data:
+            self.txtInstaLink.setText(data['instaLink'])
+        if 'ctxPath' in data:
+            self.txtCtxPath.setText(data['ctxPath'])
+        self.cmbSurfType.setCurrentText(data['surfType'])
+        self.cmbStartPoint.setCurrentText(data['startPoint'])
+        if data['friends'] == 1:
             self.rad2Friends.setChecked(True)
 
             for field in self.friendsFields:
                 field.setText('')
-
-            for name in rideData[14]:
+            for name in data['friendsName']:
                 for field in self.friendsFields:
                     if field.text() == '':
                         field.setText(name)
@@ -536,12 +564,10 @@ class MainWindow(QMainWindow):
 
         else:
             self.rad1Friends.setChecked(True)
-        if rideData[12] == 1:
+        if data['ledLights'] == 1:
             self.rad2LedLight.setChecked(True)
         else:
             self.rad1LedLight.setChecked(True)
-
-
 
 
     def resetUI(self):
@@ -550,31 +576,32 @@ class MainWindow(QMainWindow):
 
         self.labHeader.setText('New Entry · Record #'+str(nextId))
         self.btnSendSurfReport.setText('Add surf report')
-        date = QDate.fromString('2027-01-01', "yyyy-MM-dd")
-        self.dateSurfRide.setDate(date)
-        self.txtComment.setText('')
-        self.spnTimeOnWater.setValue(0)
-        self.spnDistance.setValue(0)
-        self.txtInstaLink.setText('')
-        self.txtCtxPath.setText('Drop TCX file here or')
-        self.cmbWeather.setCurrentText('')
-        self.cmbSurfType.setCurrentText('')
-        self.cmbTemperature.setCurrentText('')
-        self.cmbStartPoint.setCurrentText('')
-        self.cmbAnyInjuries.setCurrentText('')
-        self.rad2LedLight.setChecked(False)
-        self.rad2Friends.setChecked(False)
-        self.rad1Friends.setChecked(False)
-        self.rad1LedLight.setChecked(False)
-        for field in self.friendsFields:
-            field.setText('')
+
+        data = {
+            'date': '2027-01-01',
+            'weather': '',
+            'injuries': '',
+            'temperature': '',
+            'timeOnWater': 0,
+            'comments': '',
+            'distance': 0,
+            'instaLink': '',
+            'ctxPath': 'Drop TCX file here or',
+            'surfType': '',
+            'startPoint': '',
+            'friends': False,
+            'friendsName': [],
+            'ledLights': False
+        }
+
+        self.load_report(data)
+
 
     def tcx_to_json(self, tcx_path, rideId):
         TCX_NS = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
         NS = {"tcx": TCX_NS}
         tcx_file = Path(tcx_path)
         if os.path.exists(tcx_file):
-            print(tcx_file)
             root = ET.parse(tcx_file).getroot()
 
             points = []

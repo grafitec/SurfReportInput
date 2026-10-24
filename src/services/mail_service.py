@@ -4,6 +4,7 @@ from pathlib import Path
 import imaplib
 import email
 import json
+import traceback
 
 def initiate_mail_client():
     env_path = (
@@ -44,5 +45,19 @@ def get_new_mails():
                         ).decode()
 
                         jsonData = json.loads(body)
+                        jsonData['mailId'] = mail_id
                         dataFromMail.append(jsonData)
     return dataFromMail
+
+def move_mail(mailId):
+    try:
+        mailId = b'1'
+        mail = initiate_mail_client()
+        mail.select("Surfreport")
+        mail.copy(mailId, "Used surfreport")
+
+        mail.store(mailId, '+FLAGS', '\\Deleted')
+
+        mail.expunge()
+    except Exception:
+        traceback.print_exc()

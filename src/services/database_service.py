@@ -268,7 +268,7 @@ def get_next_id():
     nextNumber = len(rows)+1
     return nextNumber
 
-def load_ride_from_id(id):
+def load_database_ride_from_id(id):
     connection = sqlite3.connect(databasePath)
     cursor = connection.cursor()
     cursor.execute("""
@@ -290,4 +290,21 @@ def load_ride_from_id(id):
            friendsList.append(row[2])
         currentRowList.append(friendsList)
     connection.close()
-    return currentRowList
+
+    data = {
+        'date': currentRowList[1],
+        'weather': currentRowList[2],
+        'injuries': currentRowList[4],
+        'temperature': currentRowList[5],
+        'timeOnWater': currentRowList[6],
+        'comments': currentRowList[7],
+        'distance': currentRowList[8],
+        'instaLink': currentRowList[9],
+        'ctxPath': currentRowList[10],
+        'surfType': currentRowList[11],
+        'startPoint': currentRowList[13],
+        'friends': currentRowList[3],
+        'friendsName': currentRowList[14],
+        'ledLights': currentRowList[12]
+    }
+    return data
