@@ -7,11 +7,13 @@ import traceback
 from pathlib import Path
 
 # To do
-# Add support for mail submission
 # Tabeller
 # Kunna filtrera på rubrikerna
 # Annan typsnitt
 # en process för instagram länkar
+# Ta emot epost från TCX och lägga in den
+# Windows när man bara importerar TCX
+# Lägg till json track path i databasen
 
 # Test to run n8n for mail trigger and run a code that process the TCX files
 # When TCX process also make route picture as strava stile

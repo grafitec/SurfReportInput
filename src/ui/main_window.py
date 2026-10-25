@@ -1,6 +1,6 @@
 from PyQt6 import uic
 from PyQt6.QtGui import QPixmap, QPainter
-from PyQt6.QtWidgets import QMainWindow, QApplication, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect, QLabel, QMenu, QWidgetAction, QCheckBox, QPushButton, QMessageBox
+from PyQt6.QtWidgets import QMainWindow, QApplication, QHBoxLayout, QRadioButton, QSpacerItem, QSizePolicy, QTableWidgetItem, QDialog, QFileDialog, QGraphicsOpacityEffect, QLabel, QMenu, QWidgetAction, QCheckBox, QPushButton, QMessageBox
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import QDate, QSize, QPropertyAnimation, QTimer, Qt, pyqtSignal, QObject, QEvent
 
@@ -17,6 +17,7 @@ from services.database_service import get_location_from_database
 from services.mail_service import get_new_mails
 from services.mail_service import move_mail
 
+from services.track_service import tcx_to_json
 
 from services.analytics_service import runAnalytics
 
@@ -24,9 +25,9 @@ from ui.analytics_window import AnalyticsWindow
 
 import json
 from pathlib import Path
-import xml.etree.ElementTree as ET
 import traceback
 import os
+from datetime import datetime
 
 
 class FileDropFilter(QObject):
@@ -70,98 +71,117 @@ class LocationDialog(QDialog):
         uic.loadUi("ui/dialog_surf_launch.ui", self)
         self.btnOkay.clicked.connect(self.accept)
 
+class ImportTracksDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi("ui/choose_track.ui", self)
+        self.btnOkay.clicked.connect(self.accept)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi("ui/report.ui", self)
-        self.fileDropFilter = FileDropFilter(
-            self.uploadDropZone,
-            self.txtCtxPath
-        )
-        #self.setFixedSize(self.size())
-        self.setWindowIcon(QIcon("ui/icons/diagram.png"))
-        self.labUploadIcon = QLabel(self.uploadDropZone)
-        pixmap = QPixmap("ui/icons/upload.png")
-        self.labUploadIcon.setPixmap(
-            pixmap.scaled(
-                60, 60,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
+        try:
+            uic.loadUi("ui/report.ui", self)
+            self.fileDropFilter = FileDropFilter(
+                self.uploadDropZone,
+                self.txtCtxPath
             )
-        )
-        self.labUploadIcon.setFixedSize(40, 40)
-        self.labUploadIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.uploadDropZone.layout().insertWidget(0, self.labUploadIcon)
-
-
-
-        self.tabMain.setTabIcon(0, QIcon("ui/icons/document2.png"))
-        self.tabMain.setTabIcon(1, QIcon("ui/icons/gas-station2.png"))
-        self.tabMain.setTabIcon(2, QIcon("ui/icons/diagram.png"))
-        self.tabMain.setIconSize(QSize(16, 16))
-
-        self.labNewEntryIcon.setPixmap(
-            QPixmap("ui/icons/clipboard.svg").scaled(
-                25, 25,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation
+            self.setFixedSize(self.size())
+            self.setWindowIcon(QIcon("ui/icons/diagram.png"))
+            self.labUploadIcon = QLabel(self.uploadDropZone)
+            pixmap = QPixmap("ui/icons/upload.png")
+            self.labUploadIcon.setPixmap(
+                pixmap.scaled(
+                    60, 60,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation
+                )
             )
-        )
-
-        # Animations
-        #self.tabMain.currentChanged.connect(self.on_tab_changed)
-
-        # main buttons
-        self.btnSendSurfReport.clicked.connect(self.send_surf_report)
-        self.btnSendGasReport.clicked.connect(self.send_gas_report)
-        self.btnReset.clicked.connect(self.resetUI)
-        self.btnBrowseCtx.clicked.connect(self.browse_file)
-        self.btnAnalytics.clicked.connect(self.openAnalytics)
-
-        self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocationPopUp([self.cmbStartPoint]))
+            self.labUploadIcon.setFixedSize(40, 40)
+            self.labUploadIcon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.uploadDropZone.layout().insertWidget(0, self.labUploadIcon)
 
 
 
-        # variables
-        self.currentID = 0
-        self.dataFromMail = []
-        self.friendsFields = [self.txtFriend1, self.txtFriend2, self.txtFriend3, self.txtFriend4, self.txtFriend5, self.txtFriend6]
+            self.tabMain.setTabIcon(0, QIcon("ui/icons/document2.png"))
+            self.tabMain.setTabIcon(1, QIcon("ui/icons/gas-station2.png"))
+            self.tabMain.setTabIcon(2, QIcon("ui/icons/diagram.png"))
+            self.tabMain.setIconSize(QSize(16, 16))
 
-        # clear validation
-        self.clearVal()
+            self.labNewEntryIcon.setPixmap(
+                QPixmap("ui/icons/clipboard.svg").scaled(
+                    25, 25,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation
+                )
+            )
 
-        # Adding people
-        self.rad2Friends.toggled.connect(self.friends_toggled)
-        self.gboxAddPeople.setVisible(False)
+            # Animations
+            #self.tabMain.currentChanged.connect(self.on_tab_changed)
 
-        # Add Surf launch spot
-        self.populateStartLocation()
+            # main buttons
+            self.btnSendSurfReport.clicked.connect(self.send_surf_report)
+            self.btnSendGasReport.clicked.connect(self.send_gas_report)
+            self.btnReset.clicked.connect(self.resetUI)
+            self.btnBrowseCtx.clicked.connect(self.browse_file)
+            self.btnAnalytics.clicked.connect(self.openAnalytics)
+            self.btnImportedTracks.clicked.connect(self.show_untracked)
 
-        # Load existing tables
-        self.tabletRides.setAlternatingRowColors(True)
-        self.tabletRides.horizontalHeader().setSortIndicatorShown(True)
-        self.tabletRides.horizontalHeader().setSectionsClickable(True)
-        self.load_surf_report_into_tables()
-        nextId = get_next_id()
-        self.labHeader.setText('New Entry · Record #'+str(nextId))
-        self.setup_column_menu()
+            self.cmbStartPoint.currentTextChanged.connect(lambda: self.addStartLocationPopUp([self.cmbStartPoint]))
 
-        # Initiate mail
-        QTimer.singleShot(0, self.checkMails)
+
+
+            # variables
+            self.currentID = 0
+            self.dataFromMail = []
+            self.friendsFields = [self.txtFriend1, self.txtFriend2, self.txtFriend3, self.txtFriend4, self.txtFriend5, self.txtFriend6]
+
+            # clear validation
+            self.clearVal()
+
+            # Adding people
+            self.rad2Friends.toggled.connect(self.friends_toggled)
+            self.gboxAddPeople.setVisible(False)
+
+            # Add Surf launch spot
+            self.populateStartLocation()
+
+            # Load existing tables
+            self.tabletRides.setAlternatingRowColors(True)
+            self.tabletRides.horizontalHeader().setSortIndicatorShown(True)
+            self.tabletRides.horizontalHeader().setSectionsClickable(True)
+            self.load_surf_report_into_tables()
+            nextId = get_next_id()
+            self.labHeader.setText('New Entry · Record #'+str(nextId))
+            self.setup_column_menu()
+
+            # Initiate mail
+            QTimer.singleShot(0, self.checkMails)
+        except Exception:
+            traceback.print_exc()
 
 
     def checkMails(self):
-        self.dataFromMail = get_new_mails()
+        data = get_new_mails()
+        self.dataFromMail = data['dataFromMail']
+        msg = ''
         if not self.dataFromMail == []:
-            msg = str(len(self.dataFromMail))+' new mail reports'
+            msg = msg + str(len(self.dataFromMail)) + ' new mail reports\n'
             self.labMail.setText(str(len(self.dataFromMail))+' new mail on queue')
+            self.proceed_mail()
+        print(data['trackFromMail'])
+        if not data['trackFromMail'] == []:
+            for mail in data['trackFromMail']:
+                tcx_to_json(mail['filepath'])
+                move_mail(label='Trackreport')
+            msg = msg + str(len(data['trackFromMail'])) + ' tracks imported'
+        if not self.dataFromMail == [] and not data['trackFromMail'] == []:
             QMessageBox.information(
                 self,
                 "Newly arrived mails",
                 msg
             )
-            self.proceed_mail()
+
 
     def proceed_mail(self):
         nextId = get_next_id()
@@ -342,7 +362,7 @@ class MainWindow(QMainWindow):
 
             # Process TCX data
             if not 'Drop TCX file' in ctxPath:
-                json_file = self.tcx_to_json(ctxPath, ride_id)
+                json_file = tcx_to_json(ctxPath, ride_id)
                 rideData['ctxPath'] = json_file
                 ride_id = save_surf_report(rideData, ride_id)
 
@@ -367,7 +387,7 @@ class MainWindow(QMainWindow):
         prepear_for_new_sub = False
         if self.dataFromMail:
             mailId = self.dataFromMail[0]['mailId']
-            move_mail(mailId)
+            move_mail(label='Surfreport')
             if len(self.dataFromMail) > 1:
                 self.dataFromMail.pop(0)
             else:
@@ -596,52 +616,61 @@ class MainWindow(QMainWindow):
 
         self.load_report(data)
 
-
-    def tcx_to_json(self, tcx_path, rideId):
-        TCX_NS = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
-        NS = {"tcx": TCX_NS}
-        tcx_file = Path(tcx_path)
-        if os.path.exists(tcx_file):
-            root = ET.parse(tcx_file).getroot()
-
-            points = []
-            index = 0
-            for point in root.findall(".//tcx:Trackpoint", NS):
-                time_el = point.find("tcx:Time", NS)
-                lat_el = point.find("tcx:Position/tcx:LatitudeDegrees", NS)
-                lon_el = point.find("tcx:Position/tcx:LongitudeDegrees", NS)
-
-                if time_el is None or time_el.text is None:
-                    continue
-                if lat_el is None or lon_el is None:
-                    continue
-
-                points.append({
-                    "id": float(1),
-                    "index": int(index),
-                    "time": time_el.text,
-                    "latitude": float(lat_el.text),
-                    "longitude": float(lon_el.text),
-
-                })
-                index = index + 1
-            json_path = (
-                    Path(__file__).parent.parent.parent
-                    / "data"
-                    / "tcx"
-                    / f"appleWatchRideData_rideId_{rideId}.json"
-            )
-            json_file = Path(json_path)
-            with json_file.open("w", encoding="utf-8") as f:
-                json.dump(points, f, indent=2, ensure_ascii=False)
-            path = str(json_file).replace('\\','/')
-            return path
-        else:
-            return None
-
     def on_tab_changed(self, index):
         widget = self.tabMain.widget(index)
         self.fade_in(widget)
+
+    def show_untracked(self):
+        date = self.dateSurfRide.date().toString("yyyy-MM-dd")
+        json_folder = (
+                Path(__file__).parent.parent.parent
+                / "data"
+                / "json"
+        )
+        trackFiles = os.listdir(json_folder)
+        validTracks = []
+        for file in trackFiles:
+            if 'untracked' in file:
+                filepath = Path(json_folder / file)
+                with open(filepath, "r") as file:
+                    data = json.load(file)
+                rawTime = data[0]['time']
+                dt = datetime.strptime(rawTime, "%Y-%m-%dT%H:%M:%S.%fZ")
+                trackDate = dt.strftime("%Y-%m-%d")
+                trackTime = dt.strftime("%H:%M")
+                if trackDate == date:
+                    trackDict = {'filepath':filepath, 'trackDate':trackDate, 'trackTime':trackTime}
+                    validTracks.append(trackDict)
+        try:
+            trackDialog = ImportTracksDialog()
+            radio_buttons = []
+            for track in validTracks:
+                layout = QHBoxLayout()
+                radio = QRadioButton(track['trackDate']+' / '+track['trackTime'])
+                radio_buttons.append(radio)
+                layout.addWidget(radio)
+                spacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+                layout.addItem(spacer)
+                index = trackDialog.verticalLayout.count() - 2
+                trackDialog.verticalLayout.insertLayout(index, layout)
+
+            if trackDialog.exec():
+                print('Choose GPS-track')
+                selected_text = None
+                for radio in radio_buttons:
+                    if radio.isChecked():
+                        selected_text = radio.text()
+                        break
+                print(selected_text)
+                for track in validTracks:
+                    if track['trackDate']+' / '+track['trackTime'] == selected_text:
+                        print(track)
+                        break
+
+
+
+        except Exception:
+            traceback.print_exc()
 
     def fade_in(self, widget):
         effect = QGraphicsOpacityEffect(widget)

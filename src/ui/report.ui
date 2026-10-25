@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1058</width>
+    <width>999</width>
     <height>789</height>
    </rect>
   </property>
@@ -1045,7 +1045,7 @@
                            </sizepolicy>
                           </property>
                           <property name="text">
-                           <string>Drop TCX file here or</string>
+                           <string>Drop GPS-track file here or</string>
                           </property>
                           <property name="alignment">
                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1063,6 +1063,30 @@
                       </item>
                      </layout>
                     </widget>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_30">
+                     <item>
+                      <spacer name="horizontalSpacer_18">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="btnImportedTracks">
+                       <property name="text">
+                        <string>Choose already imported GPS-tracks</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                    <item>
                     <spacer name="verticalSpacer_2">
