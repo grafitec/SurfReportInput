@@ -1,4 +1,5 @@
 import sqlite3
+import traceback
 
 
 databasePath = "../data/surfReport.db"
@@ -22,7 +23,8 @@ def initiate_database():
         ctxPath TEXT,
         surfType TEXT,
         ledLights BOOLEAN,
-        startPoint TEXT
+        startPoint TEXT,
+        trackfile TEXT
         )
     """)
 
@@ -53,120 +55,127 @@ def initiate_database():
     connection.close()
 
 def save_surf_report(report, surfID):
-    connection = sqlite3.connect(databasePath)
-    cursor = connection.cursor()
-    if surfID == 0:
-        cursor.execute("""
-            INSERT INTO surfReport
-            (
-                rideDate,
-                weather,
-                friends,
-                injuries,
-                temperature,
-                timeOnWater,
-                comments, 
-                distance,
-                instaLink,
-                ctxPath,
-                surfType,
-                ledLights,
-                startPoint
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            report["date"],
-            report["weather"],
-            report["friends"],
-            report["injuries"],
-            report["temperature"],
-            report["timeOnWater"],
-            report["comments"],
-            report["distance"],
-            report["instaLink"],
-            report["ctxPath"],
-            report["surfType"],
-            report["ledLights"],
-            report["startPoint"]
-        ))
-        connection.commit()
-        ride_id = cursor.lastrowid
-
-        for person in report["friendsName"]:
+    try:
+        connection = sqlite3.connect(databasePath)
+        cursor = connection.cursor()
+        if surfID == 0:
             cursor.execute("""
-                INSERT INTO surfFriends
+                INSERT INTO surfReport
                 (
-                    rideId,
-                    person
+                    rideDate,
+                    weather,
+                    friends,
+                    injuries,
+                    temperature,
+                    timeOnWater,
+                    comments, 
+                    distance,
+                    instaLink,
+                    ctxPath,
+                    surfType,
+                    ledLights,
+                    startPoint,
+                    trackfile
                 )
-                VALUES (?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                ride_id,
-                person
+                report["date"],
+                report["weather"],
+                report["friends"],
+                report["injuries"],
+                report["temperature"],
+                report["timeOnWater"],
+                report["comments"],
+                report["distance"],
+                report["instaLink"],
+                report["ctxPath"],
+                report["surfType"],
+                report["ledLights"],
+                report["startPoint"],
+                report["trackfile"]
             ))
             connection.commit()
-    else:
-        cursor.execute("""
-            UPDATE surfReport
-            SET
-                rideDate = ?,
-                weather = ?,
-                friends = ?,
-                injuries = ?,
-                temperature = ?,
-                timeOnWater = ?,
-                comments = ?,
-                distance = ?,
-                instaLink = ?,
-                ctxPath = ?,
-                surfType = ?,
-                ledLights = ?,
-                startPoint = ?
-            WHERE rideId = ?
-        """,
-        (
-            report["date"],
-            report["weather"],
-            report["friends"],
-            report["injuries"],
-            report["temperature"],
-            report["timeOnWater"],
-            report["comments"],
-            report["distance"],
-            report["instaLink"],
-            report["ctxPath"],
-            report["surfType"],
-            report["ledLights"],
-            report["startPoint"],
-            surfID
-        ))
-        connection.commit()
+            ride_id = cursor.lastrowid
 
-        cursor.execute("""
-            DELETE FROM surfFriends
-            WHERE rideId = ?
-        """, (surfID,))
-
-        for person in report["friendsName"]:
-            cursor.execute("""
-                INSERT INTO surfFriends
+            for person in report["friendsName"]:
+                cursor.execute("""
+                    INSERT INTO surfFriends
+                    (
+                        rideId,
+                        person
+                    )
+                    VALUES (?, ?)
+                """,
                 (
-                    rideId,
+                    ride_id,
                     person
-                )
-                VALUES (?, ?)
+                ))
+                connection.commit()
+        else:
+            cursor.execute("""
+                UPDATE surfReport
+                SET
+                    rideDate = ?,
+                    weather = ?,
+                    friends = ?,
+                    injuries = ?,
+                    temperature = ?,
+                    timeOnWater = ?,
+                    comments = ?,
+                    distance = ?,
+                    instaLink = ?,
+                    ctxPath = ?,
+                    surfType = ?,
+                    ledLights = ?,
+                    startPoint = ?,
+                    trackfile = ?
+                WHERE rideId = ?
             """,
-           (
-               surfID,
-               person
-           ))
+            (
+                report["date"],
+                report["weather"],
+                report["friends"],
+                report["injuries"],
+                report["temperature"],
+                report["timeOnWater"],
+                report["comments"],
+                report["distance"],
+                report["instaLink"],
+                report["ctxPath"],
+                report["surfType"],
+                report["ledLights"],
+                report["startPoint"],
+                report["trackfile"],
+                surfID
+            ))
             connection.commit()
 
-        ride_id = surfID
+            cursor.execute("""
+                DELETE FROM surfFriends
+                WHERE rideId = ?
+            """, (surfID,))
 
-    connection.close()
+            for person in report["friendsName"]:
+                cursor.execute("""
+                    INSERT INTO surfFriends
+                    (
+                        rideId,
+                        person
+                    )
+                    VALUES (?, ?)
+                """,
+               (
+                   surfID,
+                   person
+               ))
+                connection.commit()
+
+            ride_id = surfID
+
+        connection.close()
+    except Exception:
+        traceback.print_exc()
 
     return ride_id
 

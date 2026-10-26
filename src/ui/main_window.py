@@ -135,6 +135,7 @@ class MainWindow(QMainWindow):
             self.currentID = 0
             self.dataFromMail = []
             self.friendsFields = [self.txtFriend1, self.txtFriend2, self.txtFriend3, self.txtFriend4, self.txtFriend5, self.txtFriend6]
+            self.trackfile = ''
 
             # clear validation
             self.clearVal()
@@ -338,7 +339,6 @@ class MainWindow(QMainWindow):
         else:
             friendsName = []
 
-
         rideData = {
             'date': date,
             'comments': comments,
@@ -354,18 +354,26 @@ class MainWindow(QMainWindow):
             'temperature': temperature,
             'startPoint': startPoint,
             'friendsName': friendsName,
+            'trackfile': ''
         }
-        json_string = json.dumps(rideData, indent=4)
         try:
+
             # Send to database
             ride_id = save_surf_report(rideData, self.currentID)
 
-            # Process TCX data
-            if not 'Drop TCX file' in ctxPath:
-                json_file = tcx_to_json(ctxPath, ride_id)
-                rideData['ctxPath'] = json_file
-                ride_id = save_surf_report(rideData, ride_id)
+            # Rename track file
+            if not self.trackfile == '':
+                source = 'un' + self.trackfile.split('.')[0].split('_un')[-1]
+                os.rename(self.trackfile, self.trackfile.replace(source, str(ride_id)))
+                self.trackfile = 'data' + self.trackfile.replace(source, str(ride_id)).split('data')[-1]
+                rideData['trackfile'] = self.trackfile
 
+            # Process TCX data
+            if not 'Drop GPS-track file here or' in ctxPath:
+                json_file = tcx_to_json(ctxPath, ride_id)
+                json_file = 'data' + json_file.split('data')[-1]
+                rideData['trackfile'] = json_file
+            ride_id = save_surf_report(rideData, ride_id)
             # Update database UI
             self.load_surf_report_into_tables()
 
@@ -433,7 +441,7 @@ class MainWindow(QMainWindow):
         reports = get_surf_report()
         self.tabletRides.setSortingEnabled(False)
         self.tabletRides.setRowCount(len(reports))
-        self.tabletRides.setColumnCount(14)
+        self.tabletRides.setColumnCount(15)
         for row_index, row_data in enumerate(reports):
             for column_index, value in enumerate(row_data):
                 self.tabletRides.setItem(row_index, column_index, QTableWidgetItem(str(value)))
@@ -451,7 +459,8 @@ class MainWindow(QMainWindow):
             "CTX",
             "Surf Type",
             "LED",
-            "Start Point"
+            "Start Point",
+            "Trackfile"
         ])
         for row_index, row_data in enumerate(reports):
             self.tabletRides.setItem(row_index, 0, NumericTableWidgetItem(str(row_data[0])))
@@ -606,12 +615,13 @@ class MainWindow(QMainWindow):
             'comments': '',
             'distance': 0,
             'instaLink': '',
-            'ctxPath': 'Drop TCX file here or',
+            'ctxPath': 'Drop GPS-track file here or',
             'surfType': '',
             'startPoint': '',
             'friends': False,
             'friendsName': [],
-            'ledLights': False
+            'ledLights': False,
+            'trackfile': ''
         }
 
         self.load_report(data)
@@ -665,6 +675,7 @@ class MainWindow(QMainWindow):
                 for track in validTracks:
                     if track['trackDate']+' / '+track['trackTime'] == selected_text:
                         print(track)
+                        self.trackfile = str(track['filepath']).replace('\\', '/')
                         break
 
 
