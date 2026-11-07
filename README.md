@@ -101,6 +101,12 @@ The goal of using AI was educational: to better understand the technologies invo
 
 <img width="999" height="817" alt="image" src="https://github.com/user-attachments/assets/3c9a82f3-4228-4778-a72e-95384c447771" />
 
+<img width="999" height="817" alt="image" src="https://github.com/user-attachments/assets/6cc4a5a3-8ded-4a18-bdba-63d5d9d47ac4" />
+
+<img width="999" height="817" alt="image" src="https://github.com/user-attachments/assets/12a3fb02-d2be-4eb9-9b96-3647c96672b7" />
+
+
+
 
 Screenshots will be added as the project evolves.
 ``
