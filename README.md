@@ -99,5 +99,8 @@ The goal of using AI was educational: to better understand the technologies invo
 
 ## Screenshots
 
+<img width="999" height="817" alt="image" src="https://github.com/user-attachments/assets/3c9a82f3-4228-4778-a72e-95384c447771" />
+
+
 Screenshots will be added as the project evolves.
 ``
