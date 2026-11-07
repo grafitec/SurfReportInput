@@ -12,6 +12,14 @@ def tcx_to_json(tcx_path, rideId=''):
         if os.path.exists(tcx_file):
             root = ET.parse(tcx_file).getroot()
 
+            max_speeds = []
+            for lap in root.findall(".//tcx:Lap", NS):
+                max_speed_el = lap.find("tcx:MaximumSpeed", NS)
+                if max_speed_el is not None:
+                    max_speeds.append(float(max_speed_el.text))
+            if max_speeds:
+                max_speed = max(max_speeds)
+
             points = []
             index = 0
             for point in root.findall(".//tcx:Trackpoint", NS):
@@ -30,6 +38,7 @@ def tcx_to_json(tcx_path, rideId=''):
                     "time": time_el.text,
                     "latitude": float(lat_el.text),
                     "longitude": float(lon_el.text),
+                    "max_speed": float(max_speed),
 
                 })
                 index = index + 1

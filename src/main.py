@@ -11,9 +11,7 @@ from pathlib import Path
 # Kunna filtrera på rubrikerna
 # Annan typsnitt
 # en process för instagram länkar
-# Ta emot epost från TCX och lägga in den
-# Windows när man bara importerar TCX
-# Lägg till json track path i databasen
+# Windows när man bara importerar TCX från mailen
 
 # Test to run n8n for mail trigger and run a code that process the TCX files
 # When TCX process also make route picture as strava stile
